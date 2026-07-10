@@ -1,0 +1,6 @@
+volume: 0.5
+chords:
+  - { name: chord_I, offset: 0, duration: 3.0 }
+  - { name: chord_V, offset: 3, duration: 3.0 }
+  - { name: chord_vi, offset: 6, duration: 3.0 }
+  - { name: chord_IV, offset: 9, duration: 3.0 }

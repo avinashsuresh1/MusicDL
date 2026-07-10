@@ -1,0 +1,37 @@
+<div class="left-section">
+  <div class="logo">
+    <div class="playback-indicator"></div>
+    MusicDL
+  </div>
+  <div class="project-title">Loading...</div>
+  
+  <button class="btn" id="btn-open">📂 Open Folder</button>
+  <button class="btn" id="btn-save" disabled>💾 Save</button>
+  <button class="btn btn-primary" id="btn-demo">🧪 Load Demo</button>
+  <button class="btn" id="btn-help">❓ Help</button>
+</div>
+
+<div class="center-section">
+  <div class="transport-group">
+    <button class="t-btn" id="btn-play" title="Run Project">▶ Run</button>
+    <button class="t-btn" id="btn-stop" title="Stop">⏹ Stop</button>
+  </div>
+  <div class="time-display">001.1.00</div>
+</div>
+
+<div class="right-section">
+  <div class="input-group">
+    <label for="input-bpm">BPM</label>
+    <input type="number" id="input-bpm" min="10" max="300" value="90">
+  </div>
+  
+  <div class="input-group">
+    <label for="input-root">Root (Hz)</label>
+    <input type="number" id="input-root" step="0.01" min="20" max="2000" value="261.63" style="width: 70px;">
+  </div>
+
+  <div class="input-group">
+    <label for="input-interval">Step (cents)</label>
+    <input type="number" id="input-interval" min="1" max="1200" value="100" style="width: 45px;">
+  </div>
+</div>

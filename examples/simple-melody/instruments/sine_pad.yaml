@@ -1,0 +1,4 @@
+harmonics:
+  - { z: 1, amplitude: 1.0 }
+  - { z: 2, amplitude: 0.3 }
+  - { z: 3, amplitude: 0.1 }

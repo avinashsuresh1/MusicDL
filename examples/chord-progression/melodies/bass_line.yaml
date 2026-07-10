@@ -1,0 +1,6 @@
+instrument: bass_synth
+notes:
+  - { pitch: -12, offset: 0,  duration: 3 }
+  - { pitch: -5,  offset: 3,  duration: 3 }
+  - { pitch: -3,  offset: 6,  duration: 3 }
+  - { pitch: -7,  offset: 9,  duration: 3 }

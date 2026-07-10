@@ -1,0 +1,9 @@
+volume: 0.9
+melodies:
+  - { name: silent_night, offset: 0 }
+  - { name: silent_night, offset: 6 }
+  - { name: all_is_calm, offset: 12 }
+  - { name: round_yon_virgin, offset: 18 }
+  - { name: round_yon_virgin, offset: 30 }
+  - { name: sleep_peace_1, offset: 42 }
+  - { name: sleep_peace_2, offset: 54 }

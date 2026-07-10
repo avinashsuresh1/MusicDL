@@ -1,0 +1,31 @@
+volume: 0.4
+chords:
+  # Measure 1-4 (C Major)
+  - { name: c_major, offset: 0, duration: 3.0 }
+  - { name: c_major, offset: 3, duration: 3.0 }
+  - { name: c_major, offset: 6, duration: 3.0 }
+  - { name: c_major, offset: 9, duration: 3.0 }
+  # Measure 5-6 (G Major, C Major)
+  - { name: g_major, offset: 12, duration: 3.0 }
+  - { name: c_major, offset: 15, duration: 3.0 }
+  # Measure 7-10 (F Major, C Major)
+  - { name: f_major, offset: 18, duration: 3.0 }
+  - { name: f_major, offset: 21, duration: 3.0 }
+  - { name: c_major, offset: 24, duration: 3.0 }
+  - { name: c_major, offset: 27, duration: 3.0 }
+  # Measure 11-14 (F Major, C Major)
+  - { name: f_major, offset: 30, duration: 3.0 }
+  - { name: f_major, offset: 33, duration: 3.0 }
+  - { name: c_major, offset: 36, duration: 3.0 }
+  - { name: c_major, offset: 39, duration: 3.0 }
+  # Measure 15-18 (G7, C Major)
+  - { name: g7_major, offset: 42, duration: 3.0 }
+  - { name: g7_major, offset: 45, duration: 3.0 }
+  - { name: c_major, offset: 48, duration: 3.0 }
+  - { name: c_major, offset: 51, duration: 3.0 }
+  # Measure 19-23
+  - { name: c_major, offset: 54, duration: 3.0 }
+  - { name: g7_major, offset: 57, duration: 3.0 }
+  - { name: c_major, offset: 60, duration: 3.0 }
+  - { name: c_major, offset: 63, duration: 3.0 }
+  - { name: c_major, offset: 66, duration: 3.0 }
