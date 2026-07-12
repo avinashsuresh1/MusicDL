@@ -1,6 +1,6 @@
 # 🎼 MusicDL (Music Definition Language)
 
-**MusicDL** is a code-first music player and project editor. It allows you to compose music by writing simple YAML files that define instruments, melodies, chords, and tracks, and play them directly in your web browser.
+**MusicDL** is a code-first music player and project editor. It allows you to compose music by writing simple YAML files that define instruments, melodies, chords, and tracks, and play them directly in the standalone desktop application.
 
 Think of it like writing code, but the output is a musical composition!
 
