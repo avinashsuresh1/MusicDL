@@ -50,14 +50,23 @@ export class AudioEngine extends EventTarget {
   }
 
   private initAudio() {
-    if (!this.ctx) {
-      this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      this.masterGain = this.ctx.createGain();
-      this.masterGain.gain.setValueAtTime(0.8, this.ctx.currentTime);
-      this.masterGain.connect(this.ctx.destination);
-    }
-    if (this.ctx.state === 'suspended') {
-      this.ctx.resume();
+    try {
+      if (!this.ctx) {
+        this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        this.masterGain = this.ctx.createGain();
+        this.masterGain.gain.setValueAtTime(0.8, this.ctx.currentTime);
+        this.masterGain.connect(this.ctx.destination);
+        console.log("AudioContext initialized successfully. State:", this.ctx.state);
+      }
+      if (this.ctx.state === 'suspended') {
+        this.ctx.resume().then(() => {
+          console.log("AudioContext resumed. State:", this.ctx?.state);
+        }).catch(err => {
+          console.error("Failed to resume AudioContext:", err);
+        });
+      }
+    } catch (err) {
+      console.error("AudioContext initialization failed:", err);
     }
   }
 

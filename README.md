@@ -13,6 +13,20 @@ MusicDL can be run in development mode or built into a standalone native desktop
 ### Prerequisites
 * **Node.js**: version `v24.18.0` or higher.
 * **Rust**: stable toolchain installed (via [rustup](https://rustup.rs/)).
+* **Linux System Libraries** (if running or building on Linux):
+  * **Audio Plugins** (GStreamer is required for Web Audio API sound output):
+    ```bash
+    sudo apt-get install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-alsa gstreamer1.0-pulseaudio
+    ```
+  * **AppImage Bundler** (FUSE is required to run the `linuxdeploy` tool):
+    ```bash
+    # For Ubuntu 22.04 and older
+    sudo apt-get install libfuse2
+    # For Ubuntu 24.04 and newer
+    sudo apt-get install libfuse2t64
+    ```
+* **macOS/Apple**: Compile-ready configuration is included, but testing on physical Apple hardware has not been completed.
+
 
 ### 1. Run in Development Mode
 To run the interactive desktop editor locally:
