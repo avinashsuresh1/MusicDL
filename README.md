@@ -8,26 +8,41 @@ Think of it like writing code, but the output is a musical composition!
 
 ## 🚀 How to Get Started
 
-### Prerequisites
-* **Node.js**: version `v24.18.0` or higher is required.
+MusicDL can be run in development mode or built into a standalone native desktop application with direct, sandbox-free filesystem access.
 
-### 1. Run the App Locally
-To run the interactive MusicDL editor on your machine:
+### Prerequisites
+* **Node.js**: version `v24.18.0` or higher.
+* **Rust**: stable toolchain installed (via [rustup](https://rustup.rs/)).
+
+### 1. Run in Development Mode
+To run the interactive desktop editor locally:
 1. Open your terminal in this folder and install dependencies:
    ```bash
    npm install
    ```
-2. Start the development server:
+2. Launch the desktop app:
    ```bash
-   npm run dev
+   npx tauri dev
    ```
-3. Open your browser and navigate to **`http://localhost:3000/`**.
+   *(This compiles the Rust backend and opens the standalone editor window. Changes inside the window will automatically hot-reload!)*
 
-### 2. Load and Play a Sample Song
-1. Click the **"📂 Open Folder"** button in the top toolbar.
+### 2. Build the Standalone Production App
+To package the app into a single, optimized desktop executable with zero runtime dependencies:
+1. Compile and bundle the app:
+   ```bash
+   npx tauri build
+   ```
+2. Find the packaged outputs:
+   * **Windows**: `src-tauri/target/release/MusicDL.exe` (executable) and `src-tauri/target/release/bundle/nsis/` (installer).
+   * **macOS**: `src-tauri/target/release/bundle/macos/MusicDL.app` and `src-tauri/target/release/bundle/dmg/` (installer).
+   * **Linux**: `src-tauri/target/release/bundle/appimage/` and `src-tauri/target/release/bundle/deb/`.
+
+### 3. Load and Play a Sample Song
+1. Click the **"📂 Open Folder"** button in the top toolbar of the desktop app.
 2. Select one of the pre-built sample folders from this project (e.g., `D:\MusicDL\examples\silent-night` or `examples\chord-progression`).
-3. Click the **"▶ Run"** button to play the song. You will hear the sound synthesize in real-time, and see notes light up in the visualizer as the playhead sweeps over them!
+3. Click the **"▶ Run"** button to play the song. You will hear the sound synthesize in real-time and see notes light up in the timeline visualizer!
 4. Click **"⏹ Stop"** to halt playback.
+5. Make edits to the YAML files directly in the editor and click **"Save"** to write back directly to the local folder!
 
 ---
 
