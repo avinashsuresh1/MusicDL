@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "A YAML-based music definition language core library",
   "private": true,
+  "engines": {
+    "node": ">=24.18.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

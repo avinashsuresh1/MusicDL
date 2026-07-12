@@ -8,6 +8,9 @@ Think of it like writing code, but the output is a musical composition!
 
 ## 🚀 How to Get Started
 
+### Prerequisites
+* **Node.js**: version `v24.18.0` or higher is required.
+
 ### 1. Run the App Locally
 To run the interactive MusicDL editor on your machine:
 1. Open your terminal in this folder and install dependencies:
