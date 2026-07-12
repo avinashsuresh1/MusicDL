@@ -125,7 +125,6 @@ export class Toolbar extends HTMLElement {
       try {
         const files = await openProjectDirectory();
         store.loadProject(files);
-        saveBtn.removeAttribute('disabled');
       } catch (err: any) {
         if (err.name !== 'AbortError') {
           alert('Error loading project: ' + err.message);
@@ -145,7 +144,6 @@ export class Toolbar extends HTMLElement {
 
     demoBtn.addEventListener('click', () => {
       store.loadProject(demoFiles);
-      saveBtn.setAttribute('disabled', 'true'); // Demo is read-only unless exported/saved
     });
 
     // Inputs updates

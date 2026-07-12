@@ -4,7 +4,10 @@ export default defineConfig({
   base: './',
   server: {
     port: 3000,
-    open: true
+    open: false,
+    watch: {
+      ignored: ['**/src-tauri/**']
+    }
   },
   build: {
     target: 'es2022',

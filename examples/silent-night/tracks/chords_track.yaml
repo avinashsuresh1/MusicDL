@@ -1,4 +1,4 @@
-volume: 0.4
+volume: 0.2
 chords:
   # Measure 1-4 (C Major)
   - { name: c_major, offset: 0, duration: 3.0 }
