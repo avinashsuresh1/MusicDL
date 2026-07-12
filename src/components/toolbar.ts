@@ -3,6 +3,7 @@ import { audioEngine } from '../engine/audio-engine.js';
 import { openProjectDirectory, saveProjectDirectory } from '../utils/file-io.js';
 import styleText from './toolbar.css?inline';
 import htmlText from './toolbar.html?raw';
+import appIconUrl from '../assets/app_icon.png';
 
 const demoFiles = {
   'composition.yaml': `title: "I-V-vi-IV Progression"
@@ -101,6 +102,7 @@ export class Toolbar extends HTMLElement {
     const playBtn = this.shadowRoot!.querySelector('#btn-play')!;
     const stopBtn = this.shadowRoot!.querySelector('#btn-stop')!;
     const openBtn = this.shadowRoot!.querySelector('#btn-open')!;
+    const newBtn = this.shadowRoot!.querySelector('#btn-new')!;
     const saveBtn = this.shadowRoot!.querySelector('#btn-save')!;
     const demoBtn = this.shadowRoot!.querySelector('#btn-demo')!;
     const helpBtn = this.shadowRoot!.querySelector('#btn-help')!;
@@ -130,6 +132,10 @@ export class Toolbar extends HTMLElement {
           alert('Error loading project: ' + err.message);
         }
       }
+    });
+
+    newBtn.addEventListener('click', () => {
+      store.createNewProject();
     });
 
     saveBtn.addEventListener('click', async () => {
@@ -225,9 +231,13 @@ export class Toolbar extends HTMLElement {
   }
 
   private render() {
+    let template = htmlText.replace(
+      '<div class="playback-indicator"></div>',
+      `<div class="playback-indicator"></div><img src="${appIconUrl}" class="logo-icon" alt="MusicDL Logo" />`
+    );
     this.shadowRoot!.innerHTML = `
       <style>${styleText}</style>
-      ${htmlText}
+      ${template}
     `;
   }
 }

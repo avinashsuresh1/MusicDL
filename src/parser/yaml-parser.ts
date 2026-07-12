@@ -8,6 +8,15 @@ function normalizePath(path: string): string {
   return path.replace(/\\/g, '/').replace(/^\.\//, '').replace(/^\//, '');
 }
 
+export function validateObjectKeys(obj: any, expectedKeys: Set<string>, errorPrefix: string) {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return;
+  for (const key of Object.keys(obj)) {
+    if (!expectedKeys.has(key)) {
+      throw new Error(`${errorPrefix}: Unrecognized parameter '${key}'`);
+    }
+  }
+}
+
 /**
  * Parse composition metadata from composition.yaml.
  */
@@ -21,6 +30,8 @@ export function parseCompositionMeta(yamlContent: string): {
   if (!data) {
     throw new Error('composition.yaml is empty or invalid');
   }
+
+  validateObjectKeys(data, new Set(['title', 'tempo', 'root_frequency', 'interval']), 'composition.yaml');
 
   if (typeof data.title !== 'string' || !data.title.trim()) {
     throw new Error("composition.yaml: 'title' must be a non-empty string");
@@ -56,7 +67,10 @@ export function parseInstrument(yamlContent: string, name: string): Instrument {
     throw new Error(`Instrument '${name}' must have a 'harmonics' list`);
   }
 
+  validateObjectKeys(data, new Set(['harmonics', 'adsr']), `Instrument '${name}'`);
+
   const harmonics: Harmonic[] = data.harmonics.map((h: any, idx: number) => {
+    validateObjectKeys(h, new Set(['z', 'amplitude']), `Instrument '${name}': harmonic[${idx}]`);
     if (typeof h.z !== 'number' || isNaN(h.z) || h.z <= 0) {
       throw new Error(`Instrument '${name}': harmonic[${idx}] 'z' must be a positive number`);
     }
@@ -72,6 +86,7 @@ export function parseInstrument(yamlContent: string, name: string): Instrument {
   const instrument: Instrument = { name, harmonics };
 
   if (data.adsr) {
+    validateObjectKeys(data.adsr, new Set(['attack', 'decay', 'sustain', 'release']), `Instrument '${name}': adsr`);
     if (
       typeof data.adsr.attack !== 'number' || isNaN(data.adsr.attack) || data.adsr.attack < 0 ||
       typeof data.adsr.decay !== 'number' || isNaN(data.adsr.decay) || data.adsr.decay < 0 ||
@@ -100,6 +115,8 @@ export function parseMelody(yamlContent: string, name: string): Melody {
     throw new Error(`Melody '${name}' is empty or invalid`);
   }
 
+  validateObjectKeys(data, new Set(['type', 'instrument', 'notes']), `Melody '${name}'`);
+
   if (typeof data.instrument !== 'string' || !data.instrument.trim()) {
     throw new Error(`Melody '${name}': 'instrument' must be a non-empty string`);
   }
@@ -109,6 +126,7 @@ export function parseMelody(yamlContent: string, name: string): Melody {
   }
 
   const notes: Note[] = data.notes.map((n: any, idx: number) => {
+    validateObjectKeys(n, new Set(['pitch', 'offset', 'duration']), `Melody '${name}': note[${idx}]`);
     let pitch: number | 'rest';
     if (n.pitch === 'rest') {
       pitch = 'rest';
@@ -149,6 +167,8 @@ export function parseTrack(yamlContent: string, name: string): Track {
     throw new Error(`Track '${name}' is empty or invalid`);
   }
 
+  validateObjectKeys(data, new Set(['volume', 'melodies', 'chords']), `Track '${name}'`);
+
   if (typeof data.volume !== 'number' || isNaN(data.volume) || data.volume < 0 || data.volume > 1) {
     throw new Error(`Track '${name}': 'volume' must be a number between 0.0 and 1.0`);
   }
@@ -166,6 +186,7 @@ export function parseTrack(yamlContent: string, name: string): Track {
         }
         melodies.push(m.trim());
       } else if (m && typeof m === 'object' && typeof m.name === 'string') {
+        validateObjectKeys(m, new Set(['name', 'offset']), `Track '${name}': melodies[${idx}]`);
         if (typeof m.offset !== 'number' || isNaN(m.offset) || m.offset < 0) {
           throw new Error(`Track '${name}': melodies[${idx}] 'offset' must be a non-negative number`);
         }
@@ -189,6 +210,7 @@ export function parseTrack(yamlContent: string, name: string): Track {
       if (!c || typeof c !== 'object' || typeof c.name !== 'string') {
         throw new Error(`Track '${name}': chords[${idx}] must be a valid chord reference object`);
       }
+      validateObjectKeys(c, new Set(['name', 'offset', 'duration']), `Track '${name}': chords[${idx}]`);
       if (typeof c.offset !== 'number' || isNaN(c.offset) || c.offset < 0) {
         throw new Error(`Track '${name}': chords[${idx}] 'offset' must be a non-negative number`);
       }
@@ -214,6 +236,8 @@ export function parseChord(yamlContent: string, name: string): Chord {
   if (!data) {
     throw new Error(`Chord '${name}' is empty or invalid`);
   }
+
+  validateObjectKeys(data, new Set(['instrument', 'pitches']), `Chord '${name}'`);
 
   if (typeof data.instrument !== 'string' || !data.instrument.trim()) {
     throw new Error(`Chord '${name}': 'instrument' must be a non-empty string`);
@@ -251,7 +275,13 @@ export function parseProject(files: Record<string, string>): Composition {
     throw new Error("Missing 'composition.yaml' in project files");
   }
 
-  const meta = parseCompositionMeta(metaContent);
+  let meta;
+  try {
+    meta = parseCompositionMeta(metaContent);
+  } catch (err: any) {
+    throw new Error(`In composition.yaml: ${err.message}`);
+  }
+
   const instruments: Record<string, Instrument> = {};
   const melodies: Record<string, Melody> = {};
   const chords: Record<string, Chord> = {};
@@ -267,28 +297,44 @@ export function parseProject(files: Record<string, string>): Composition {
     const instMatch = path.match(instrumentRegex);
     if (instMatch) {
       const name = instMatch[1];
-      instruments[name] = parseInstrument(content, name);
+      try {
+        instruments[name] = parseInstrument(content, name);
+      } catch (err: any) {
+        throw new Error(`In ${path}: ${err.message}`);
+      }
       continue;
     }
 
     const melMatch = path.match(melodyRegex);
     if (melMatch) {
       const name = melMatch[1];
-      melodies[name] = parseMelody(content, name);
+      try {
+        melodies[name] = parseMelody(content, name);
+      } catch (err: any) {
+        throw new Error(`In ${path}: ${err.message}`);
+      }
       continue;
     }
 
     const chordMatch = path.match(chordRegex);
     if (chordMatch) {
       const name = chordMatch[1];
-      chords[name] = parseChord(content, name);
+      try {
+        chords[name] = parseChord(content, name);
+      } catch (err: any) {
+        throw new Error(`In ${path}: ${err.message}`);
+      }
       continue;
     }
 
     const trackMatch = path.match(trackRegex);
     if (trackMatch) {
       const name = trackMatch[1];
-      tracks.push(parseTrack(content, name));
+      try {
+        tracks.push(parseTrack(content, name));
+      } catch (err: any) {
+        throw new Error(`In ${path}: ${err.message}`);
+      }
       continue;
     }
   }

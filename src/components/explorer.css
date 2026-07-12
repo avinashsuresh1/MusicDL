@@ -78,3 +78,45 @@
   background: var(--accent, #ff007f);
   box-shadow: 0 0 6px var(--accent, #ff007f);
 }
+
+.actions {
+  display: none;
+  gap: 4px;
+}
+
+.file-item:hover .actions {
+  display: flex;
+}
+
+.action-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 10px;
+  border-radius: 4px;
+  color: var(--text-muted, #8e8e93);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-main, #f5f5f7);
+}
+
+.add-file-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  font-size: 14px;
+  line-height: 1;
+  border-radius: 4px;
+  color: var(--text-muted, #8e8e93);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.add-file-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--secondary, #00f2fe);
+}

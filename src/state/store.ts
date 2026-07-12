@@ -3,6 +3,7 @@ import { parseProject } from '../parser/yaml-parser.js';
 import { serializeProject, serializeMelody, serializeTrack, serializeInstrument, serializeCompositionMeta } from '../parser/serializer.js';
 import { validateComposition } from '../parser/validator.js';
 import { audioEngine } from '../engine/audio-engine.js';
+import { renameProjectFile, deleteProjectFile, createNewProjectDirectory, saveProjectDirectory } from '../utils/file-io.js';
 
 export class ProjectStore extends EventTarget {
   private composition: Composition | null = null;
@@ -136,12 +137,13 @@ export class ProjectStore extends EventTarget {
       const comp = parseProject(this.files);
       const valResult = validateComposition(comp);
       
+      this.composition = comp;
+
       if (!valResult.valid) {
         this.errors = valResult.errors;
         this.dispatchEvent(new CustomEvent('validation-failed'));
       } else {
         this.errors = [];
-        this.composition = comp;
         audioEngine.setComposition(comp);
         this.dispatchEvent(new CustomEvent('composition-changed'));
       }
@@ -230,6 +232,99 @@ export class ProjectStore extends EventTarget {
     const yamlStr = serializeInstrument(instrument);
     this.files[`instruments/${name}.yaml`] = yamlStr;
     this.reparseProject();
+  }
+
+  // File System mutations (IDE Actions)
+  async renameFile(oldPath: string, newPath: string) {
+    if (!this.files[oldPath]) return;
+    const content = this.files[oldPath];
+    delete this.files[oldPath];
+    this.files[newPath] = content;
+
+    if (this.activeFilePath === oldPath) {
+      this.activeFilePath = newPath;
+    }
+
+    try {
+      await renameProjectFile(oldPath, newPath);
+    } catch (err) {
+      console.error('Failed to rename file on disk:', err);
+    }
+
+    this.reparseProject();
+    this.dispatchEvent(new CustomEvent('project-loaded'));
+  }
+
+  async deleteFile(path: string) {
+    if (!this.files[path]) return;
+    delete this.files[path];
+
+    if (this.activeFilePath === path) {
+      this.activeFilePath = 'composition.yaml';
+    }
+
+    try {
+      await deleteProjectFile(path);
+    } catch (err) {
+      console.error('Failed to delete file on disk:', err);
+    }
+
+    this.reparseProject();
+    this.dispatchEvent(new CustomEvent('project-loaded'));
+  }
+
+  async addFile(folder: string, name: string) {
+    const cleanName = name.replace(/\.ya?ml$/i, '').trim();
+    if (!cleanName) return;
+
+    const relPath = `${folder}/${cleanName}.yaml`;
+    if (this.files[relPath]) {
+      throw new Error(`File '${relPath}' already exists.`);
+    }
+
+    const availableInstrument = this.composition ? Object.keys(this.composition.instruments)[0] : 'synth';
+    
+    let content = '';
+    if (folder === 'instruments') {
+      content = `harmonics:\n  - { z: 1, amplitude: 1.0 }\n`;
+    } else if (folder === 'melodies') {
+      content = `type: melody\ninstrument: ${availableInstrument}\nnotes:\n  - { pitch: 0, offset: 0, duration: 1 }\n`;
+    } else if (folder === 'chords') {
+      content = `instrument: ${availableInstrument}\npitches: [0, 4, 7]\n`;
+    } else if (folder === 'tracks') {
+      content = `volume: 0.8\nmelodies: []\n`;
+    }
+
+    this.files[relPath] = content;
+
+    try {
+      // Save it immediately to the local directory if running inside Tauri
+      await saveProjectDirectory(this.files);
+    } catch (err) {
+      console.error('Failed to save newly created file to disk:', err);
+    }
+
+    this.activeFilePath = relPath;
+    this.reparseProject();
+    this.dispatchEvent(new CustomEvent('project-loaded'));
+  }
+
+  async createNewProject() {
+    const defaultProjectFiles: Record<string, string> = {
+      'composition.yaml': `title: "New Project"\ntempo: 120\nroot_frequency: 261.63\ninterval: 100\n`,
+      'instruments/synth.yaml': `harmonics:\n  - { z: 1, amplitude: 1.0 }\n  - { z: 2, amplitude: 0.3 }\n`,
+      'melodies/melody_1.yaml': `type: melody\ninstrument: synth\nnotes:\n  - { pitch: 0, offset: 0, duration: 1 }\n  - { pitch: 4, offset: 1, duration: 1 }\n  - { pitch: 7, offset: 2, duration: 2 }\n`,
+      'tracks/lead.yaml': `volume: 0.8\nmelodies:\n  - melody_1\n`
+    };
+
+    try {
+      const result = await createNewProjectDirectory(defaultProjectFiles);
+      if (result) {
+        this.loadProject(result.files);
+      }
+    } catch (err: any) {
+      alert('Error creating new project: ' + err.message);
+    }
   }
 }
 
