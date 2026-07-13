@@ -79,7 +79,7 @@ export class Explorer extends HTMLElement {
       
       html += `
         <div class="file-item root-file ${activeCls} ${hasError ? 'has-error' : ''}" data-path="${path}">
-          <div style="display: flex; align-items: center;">
+          <div style="display: flex; align-items: center; flex: 1;">
             <span class="icon">📄</span>
             <span class="name">${path}</span>
           </div>
@@ -90,13 +90,14 @@ export class Explorer extends HTMLElement {
 
     // 2. Folders
     Object.entries(folders).forEach(([folderName, filesList]) => {
-      if (filesList.length === 0) return;
-
       html += `
         <div class="folder-group">
           <div class="folder-header">
-            <span>📁</span>
-            <span>${folderName}</span>
+            <div style="display: flex; align-items: center; flex: 1;">
+              <span class="icon">📁</span>
+              <span>${folderName}</span>
+            </div>
+            <button class="add-file-btn" data-folder="${folderName}" title="Add File">+</button>
           </div>
       `;
 
@@ -107,9 +108,13 @@ export class Explorer extends HTMLElement {
 
         html += `
           <div class="file-item ${activeCls} ${hasError ? 'has-error' : ''}" data-path="${path}">
-            <div style="display: flex; align-items: center;">
+            <div style="display: flex; align-items: center; flex: 1;">
               <span class="icon">${this.getFileIcon(folderName)}</span>
               <span class="name">${fileName}</span>
+            </div>
+            <div class="actions">
+              <button class="action-btn btn-rename" title="Rename" data-path="${path}">✏️</button>
+              <button class="action-btn btn-delete" title="Delete" data-path="${path}">🗑️</button>
             </div>
             ${hasError ? '<div class="error-badge"></div>' : ''}
           </div>
@@ -126,9 +131,61 @@ export class Explorer extends HTMLElement {
     // Attach click listeners
     const items = this.shadowRoot!.querySelectorAll('.file-item');
     items.forEach(item => {
-      item.addEventListener('click', () => {
+      item.addEventListener('click', (e: Event) => {
+        const target = e.target as HTMLElement;
+        if (target.classList.contains('action-btn')) {
+          return;
+        }
         const path = item.getAttribute('data-path')!;
         store.setActiveFilePath(path);
+      });
+    });
+
+    // Attach rename listeners
+    const renameBtns = this.shadowRoot!.querySelectorAll('.btn-rename');
+    renameBtns.forEach(btn => {
+      btn.addEventListener('click', (e: Event) => {
+        e.stopPropagation();
+        const path = btn.getAttribute('data-path')!;
+        const parts = path.split('/');
+        const dir = parts[0];
+        const oldNameWithExt = parts[1];
+        const oldName = oldNameWithExt.replace(/\.ya?ml$/i, '');
+
+        const newName = prompt(`Rename ${oldName} to:`, oldName);
+        if (newName && newName.trim() && newName.trim() !== oldName) {
+          const newPath = `${dir}/${newName.trim()}.yaml`;
+          store.renameFile(path, newPath).catch(err => alert(err.message));
+        }
+      });
+    });
+
+    // Attach delete listeners
+    const deleteBtns = this.shadowRoot!.querySelectorAll('.btn-delete');
+    deleteBtns.forEach(btn => {
+      btn.addEventListener('click', (e: Event) => {
+        e.stopPropagation();
+        const path = btn.getAttribute('data-path')!;
+        const fileName = path.split('/')[1];
+
+        if (confirm(`Are you sure you want to delete ${fileName}?`)) {
+          store.deleteFile(path).catch(err => alert(err.message));
+        }
+      });
+    });
+
+    // Attach add file listeners
+    const addBtns = this.shadowRoot!.querySelectorAll('.add-file-btn');
+    addBtns.forEach(btn => {
+      btn.addEventListener('click', (e: Event) => {
+        e.stopPropagation();
+        const folder = btn.getAttribute('data-folder')!;
+        const singular = folder.slice(0, -1);
+
+        const name = prompt(`Enter new ${singular} name:`);
+        if (name && name.trim()) {
+          store.addFile(folder, name.trim()).catch(err => alert(err.message));
+        }
       });
     });
   }
@@ -136,6 +193,7 @@ export class Explorer extends HTMLElement {
   private getFileIcon(folder: string): string {
     if (folder === 'instruments') return '🎛️';
     if (folder === 'melodies') return '🎹';
+    if (folder === 'chords') return '🎶';
     if (folder === 'tracks') return '🔀';
     return '📄';
   }

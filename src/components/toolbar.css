@@ -27,6 +27,13 @@
   letter-spacing: 0.5px;
 }
 
+.logo-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
 .playback-indicator {
   width: 8px;
   height: 8px;

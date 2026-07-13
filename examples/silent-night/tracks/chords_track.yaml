@@ -1,31 +1,31 @@
 volume: 0.2
 chords:
-  # Measure 1-4 (C Major)
-  - { name: c_major, offset: 0, duration: 3.0 }
-  - { name: c_major, offset: 3, duration: 3.0 }
-  - { name: c_major, offset: 6, duration: 3.0 }
-  - { name: c_major, offset: 9, duration: 3.0 }
-  # Measure 5-6 (G Major, C Major)
-  - { name: g_major, offset: 12, duration: 3.0 }
-  - { name: c_major, offset: 15, duration: 3.0 }
-  # Measure 7-10 (F Major, C Major)
-  - { name: f_major, offset: 18, duration: 3.0 }
-  - { name: f_major, offset: 21, duration: 3.0 }
-  - { name: c_major, offset: 24, duration: 3.0 }
-  - { name: c_major, offset: 27, duration: 3.0 }
-  # Measure 11-14 (F Major, C Major)
-  - { name: f_major, offset: 30, duration: 3.0 }
-  - { name: f_major, offset: 33, duration: 3.0 }
-  - { name: c_major, offset: 36, duration: 3.0 }
-  - { name: c_major, offset: 39, duration: 3.0 }
-  # Measure 15-18 (G7, C Major)
-  - { name: g7_major, offset: 42, duration: 3.0 }
-  - { name: g7_major, offset: 45, duration: 3.0 }
-  - { name: c_major, offset: 48, duration: 3.0 }
-  - { name: c_major, offset: 51, duration: 3.0 }
+  # Measure 1-4 (I)
+  - { name: I, offset: 0, duration: 3.0 }
+  - { name: I, offset: 3, duration: 3.0 }
+  - { name: I, offset: 6, duration: 3.0 }
+  - { name: I, offset: 9, duration: 3.0 }
+  # Measure 5-6 (V, I)
+  - { name: V, offset: 12, duration: 3.0 }
+  - { name: I, offset: 15, duration: 3.0 }
+  # Measure 7-10 (IV, I)
+  - { name: IV, offset: 18, duration: 3.0 }
+  - { name: IV, offset: 21, duration: 3.0 }
+  - { name: I, offset: 24, duration: 3.0 }
+  - { name: I, offset: 27, duration: 3.0 }
+  # Measure 11-14 (IV, I)
+  - { name: IV, offset: 30, duration: 3.0 }
+  - { name: IV, offset: 33, duration: 3.0 }
+  - { name: I, offset: 36, duration: 3.0 }
+  - { name: I, offset: 39, duration: 3.0 }
+  # Measure 15-18 (V7, I)
+  - { name: V7, offset: 42, duration: 3.0 }
+  - { name: V7, offset: 45, duration: 3.0 }
+  - { name: I, offset: 48, duration: 3.0 }
+  - { name: I, offset: 51, duration: 3.0 }
   # Measure 19-23
-  - { name: c_major, offset: 54, duration: 3.0 }
-  - { name: g7_major, offset: 57, duration: 3.0 }
-  - { name: c_major, offset: 60, duration: 3.0 }
-  - { name: c_major, offset: 63, duration: 3.0 }
-  - { name: c_major, offset: 66, duration: 3.0 }
+  - { name: I, offset: 54, duration: 3.0 }
+  - { name: V7, offset: 57, duration: 3.0 }
+  - { name: I, offset: 60, duration: 3.0 }
+  - { name: I, offset: 63, duration: 3.0 }
+  - { name: I, offset: 66, duration: 3.0 }

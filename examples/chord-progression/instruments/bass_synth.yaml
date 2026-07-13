@@ -3,3 +3,8 @@ harmonics:
   - { z: 2, amplitude: 0.7 }
   - { z: 3, amplitude: 0.4 }
   - { z: 0.5, amplitude: 0.3 }
+adsr:
+  attack: 20
+  decay: 100
+  sustain: 0.8
+  release: 150
