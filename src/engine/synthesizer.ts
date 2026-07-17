@@ -42,21 +42,47 @@ export function playNote(
   if (duration <= A) {
     // Note is released during the attack phase
     const volumeAtRelease = A > 0 ? (duration / A) * peakVolume : peakVolume;
-    gainNode.gain.linearRampToValueAtTime(volumeAtRelease, releaseTime);
+    if (A > 0) {
+      gainNode.gain.linearRampToValueAtTime(volumeAtRelease, releaseTime);
+    } else {
+      gainNode.gain.setValueAtTime(peakVolume, playStartTime);
+    }
     gainNode.gain.setValueAtTime(volumeAtRelease, releaseTime);
     gainNode.gain.linearRampToValueAtTime(0, endTime);
   } else if (duration <= A + D) {
     // Note is released during the decay phase
-    gainNode.gain.linearRampToValueAtTime(peakVolume, playStartTime + A);
+    if (A > 0) {
+      gainNode.gain.linearRampToValueAtTime(peakVolume, playStartTime + A);
+    } else {
+      gainNode.gain.setValueAtTime(peakVolume, playStartTime);
+    }
+    
     const decayDuration = duration - A;
     const volumeAtRelease = D > 0 ? peakVolume - (decayDuration / D) * (peakVolume - sustainVolume) : sustainVolume;
-    gainNode.gain.linearRampToValueAtTime(volumeAtRelease, releaseTime);
+    if (D > 0) {
+      gainNode.gain.linearRampToValueAtTime(volumeAtRelease, releaseTime);
+    } else {
+      gainNode.gain.setValueAtTime(sustainVolume, releaseTime);
+    }
     gainNode.gain.setValueAtTime(volumeAtRelease, releaseTime);
     gainNode.gain.linearRampToValueAtTime(0, endTime);
   } else {
     // Standard ADSR
-    gainNode.gain.linearRampToValueAtTime(peakVolume, playStartTime + A);
-    gainNode.gain.linearRampToValueAtTime(sustainVolume, playStartTime + A + D);
+    if (A > 0) {
+      gainNode.gain.linearRampToValueAtTime(peakVolume, playStartTime + A);
+      if (D > 0) {
+        gainNode.gain.linearRampToValueAtTime(sustainVolume, playStartTime + A + D);
+      } else {
+        gainNode.gain.setValueAtTime(sustainVolume, playStartTime + A);
+      }
+    } else {
+      gainNode.gain.setValueAtTime(peakVolume, playStartTime);
+      if (D > 0) {
+        gainNode.gain.linearRampToValueAtTime(sustainVolume, playStartTime + D);
+      } else {
+        gainNode.gain.setValueAtTime(sustainVolume, playStartTime);
+      }
+    }
     gainNode.gain.setValueAtTime(sustainVolume, releaseTime);
     gainNode.gain.linearRampToValueAtTime(0, endTime);
   }

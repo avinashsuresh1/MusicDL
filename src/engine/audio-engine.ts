@@ -54,9 +54,19 @@ export class AudioEngine extends EventTarget {
       if (!this.ctx) {
         this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
         this.masterGain = this.ctx.createGain();
-        this.masterGain.gain.setValueAtTime(0.8, this.ctx.currentTime);
-        this.masterGain.connect(this.ctx.destination);
-        console.log("AudioContext initialized successfully. State:", this.ctx.state);
+        this.masterGain.gain.setValueAtTime(0.5, this.ctx.currentTime);
+
+        // Add a DynamicsCompressorNode to prevent clipping and system-level AGC/ducking on Linux
+        const compressor = this.ctx.createDynamicsCompressor();
+        compressor.threshold.setValueAtTime(-12, this.ctx.currentTime);
+        compressor.knee.setValueAtTime(30, this.ctx.currentTime);
+        compressor.ratio.setValueAtTime(12, this.ctx.currentTime);
+        compressor.attack.setValueAtTime(0.003, this.ctx.currentTime);
+        compressor.release.setValueAtTime(0.25, this.ctx.currentTime);
+
+        this.masterGain.connect(compressor);
+        compressor.connect(this.ctx.destination);
+        console.log("AudioContext initialized successfully with Compressor. State:", this.ctx.state);
       }
       if (this.ctx.state === 'suspended') {
         this.ctx.resume().then(() => {
