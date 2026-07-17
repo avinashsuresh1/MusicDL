@@ -120,12 +120,10 @@ export function playNote(
   }
 
   // Define a cleanup function to disconnect nodes and release resources
-  let cleanupTimeout: any = null;
+  let cleanedUp = false;
   const cleanup = () => {
-    if (cleanupTimeout) {
-      clearTimeout(cleanupTimeout);
-      cleanupTimeout = null;
-    }
+    if (cleanedUp) return;
+    cleanedUp = true;
     try {
       gainNode.disconnect();
       oscillators.forEach(osc => {
@@ -141,8 +139,12 @@ export function playNote(
     } catch (_) {}
   };
 
-  // Schedule automatic cleanup shortly after the note release tail completes
-  cleanupTimeout = setTimeout(cleanup, (duration + R + 0.5) * 1000);
+  // Trigger cleanup exactly when the first oscillator stops playing on the audio thread
+  if (oscillators.length > 0) {
+    oscillators[0].onended = () => {
+      cleanup();
+    };
+  }
 
   const stop = (time: number) => {
     try {
