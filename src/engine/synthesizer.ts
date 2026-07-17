@@ -43,16 +43,15 @@ export function playNote(
     // Note is released during the attack phase
     const volumeAtRelease = A > 0 ? (duration / A) * peakVolume : peakVolume;
     if (A > 0) {
-      gainNode.gain.linearRampToValueAtTime(volumeAtRelease, releaseTime);
+      gainNode.gain.setTargetAtTime(volumeAtRelease, playStartTime, A / 3);
     } else {
       gainNode.gain.setValueAtTime(peakVolume, playStartTime);
     }
-    gainNode.gain.setValueAtTime(volumeAtRelease, releaseTime);
-    gainNode.gain.linearRampToValueAtTime(0, endTime);
+    gainNode.gain.setTargetAtTime(0, releaseTime, R / 3);
   } else if (duration <= A + D) {
     // Note is released during the decay phase
     if (A > 0) {
-      gainNode.gain.linearRampToValueAtTime(peakVolume, playStartTime + A);
+      gainNode.gain.setTargetAtTime(peakVolume, playStartTime, A / 3);
     } else {
       gainNode.gain.setValueAtTime(peakVolume, playStartTime);
     }
@@ -60,39 +59,40 @@ export function playNote(
     const decayDuration = duration - A;
     const volumeAtRelease = D > 0 ? peakVolume - (decayDuration / D) * (peakVolume - sustainVolume) : sustainVolume;
     if (D > 0) {
-      gainNode.gain.linearRampToValueAtTime(volumeAtRelease, releaseTime);
+      gainNode.gain.setTargetAtTime(volumeAtRelease, playStartTime + A, D / 3);
     } else {
-      gainNode.gain.setValueAtTime(sustainVolume, releaseTime);
+      gainNode.gain.setValueAtTime(sustainVolume, playStartTime + A);
     }
-    gainNode.gain.setValueAtTime(volumeAtRelease, releaseTime);
-    gainNode.gain.linearRampToValueAtTime(0, endTime);
+    gainNode.gain.setTargetAtTime(0, releaseTime, R / 3);
   } else {
     // Standard ADSR
     if (A > 0) {
-      gainNode.gain.linearRampToValueAtTime(peakVolume, playStartTime + A);
+      gainNode.gain.setTargetAtTime(peakVolume, playStartTime, A / 3);
       if (D > 0) {
-        gainNode.gain.linearRampToValueAtTime(sustainVolume, playStartTime + A + D);
+        gainNode.gain.setTargetAtTime(sustainVolume, playStartTime + A, D / 3);
       } else {
         gainNode.gain.setValueAtTime(sustainVolume, playStartTime + A);
       }
     } else {
       gainNode.gain.setValueAtTime(peakVolume, playStartTime);
       if (D > 0) {
-        gainNode.gain.linearRampToValueAtTime(sustainVolume, playStartTime + D);
+        gainNode.gain.setTargetAtTime(sustainVolume, playStartTime, D / 3);
       } else {
         gainNode.gain.setValueAtTime(sustainVolume, playStartTime);
       }
     }
-    gainNode.gain.setValueAtTime(sustainVolume, releaseTime);
-    gainNode.gain.linearRampToValueAtTime(0, endTime);
+    gainNode.gain.setTargetAtTime(0, releaseTime, R / 3);
   }
 
   const oscillators: OscillatorNode[] = [];
   const intermediateGains: GainNode[] = [];
-  const allHarmonicsInteger = instrument.harmonics.every(h => Number.isInteger(h.z));
+  
+  // WebKitGTK / GStreamer has multiple volume normalization and clipping bugs with createPeriodicWave.
+  // We force playMultiOscillator to ensure consistent volume scaling across all platforms.
+  const allHarmonicsInteger = false;
 
   if (allHarmonicsInteger && instrument.harmonics.length > 0) {
-    // Optimization: Use a single PeriodicWave oscillator
+    // Optimization: Use a single PeriodicWave oscillator (bypassed on WebKitGTK/Linux)
     const maxZ = Math.max(...instrument.harmonics.map(h => h.z));
     const real = new Float32Array(maxZ + 1);
     const imag = new Float32Array(maxZ + 1);
