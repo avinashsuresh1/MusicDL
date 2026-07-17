@@ -88,6 +88,7 @@ export function playNote(
   }
 
   const oscillators: OscillatorNode[] = [];
+  const intermediateGains: GainNode[] = [];
   const allHarmonicsInteger = instrument.harmonics.every(h => Number.isInteger(h.z));
 
   if (allHarmonicsInteger && instrument.harmonics.length > 0) {
@@ -112,10 +113,10 @@ export function playNote(
       osc.stop(endTime);
       oscillators.push(osc);
     } catch (e) {
-      playMultiOscillator(ctx, gainNode, frequency, playStartTime, endTime, instrument, oscillators);
+      playMultiOscillator(ctx, gainNode, frequency, playStartTime, endTime, instrument, oscillators, intermediateGains);
     }
   } else {
-    playMultiOscillator(ctx, gainNode, frequency, playStartTime, endTime, instrument, oscillators);
+    playMultiOscillator(ctx, gainNode, frequency, playStartTime, endTime, instrument, oscillators, intermediateGains);
   }
 
   // Define a cleanup function to disconnect nodes and release resources
@@ -130,6 +131,11 @@ export function playNote(
       oscillators.forEach(osc => {
         try {
           osc.disconnect();
+        } catch (_) {}
+      });
+      intermediateGains.forEach(g => {
+        try {
+          g.disconnect();
         } catch (_) {}
       });
     } catch (_) {}
@@ -171,7 +177,8 @@ function playMultiOscillator(
   startTime: number,
   endTime: number,
   instrument: Instrument,
-  oscillatorsList: OscillatorNode[]
+  oscillatorsList: OscillatorNode[],
+  intermediateGainsList: GainNode[]
 ): void {
   for (const h of instrument.harmonics) {
     if (h.amplitude <= 0) continue;
@@ -189,5 +196,6 @@ function playMultiOscillator(
     osc.stop(endTime);
     
     oscillatorsList.push(osc);
+    intermediateGainsList.push(oscGain);
   }
 }
