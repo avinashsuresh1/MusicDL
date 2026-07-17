@@ -28,7 +28,7 @@ export class AudioEngine extends EventTarget {
   
   // Look-ahead parameters
   private readonly lookAheadMs = 40.0;
-  private readonly scheduleAheadTimeSec = 0.12;
+  private readonly scheduleAheadTimeSec = 0.40;
 
   constructor() {
     super();
@@ -56,17 +56,8 @@ export class AudioEngine extends EventTarget {
         this.masterGain = this.ctx.createGain();
         this.masterGain.gain.setValueAtTime(0.5, this.ctx.currentTime);
 
-        // Add a DynamicsCompressorNode to prevent clipping and system-level AGC/ducking on Linux
-        const compressor = this.ctx.createDynamicsCompressor();
-        compressor.threshold.setValueAtTime(-12, this.ctx.currentTime);
-        compressor.knee.setValueAtTime(30, this.ctx.currentTime);
-        compressor.ratio.setValueAtTime(12, this.ctx.currentTime);
-        compressor.attack.setValueAtTime(0.003, this.ctx.currentTime);
-        compressor.release.setValueAtTime(0.25, this.ctx.currentTime);
-
-        this.masterGain.connect(compressor);
-        compressor.connect(this.ctx.destination);
-        console.log("AudioContext initialized successfully with Compressor. State:", this.ctx.state);
+        this.masterGain.connect(this.ctx.destination);
+        console.log("AudioContext initialized successfully. State:", this.ctx.state);
       }
       if (this.ctx.state === 'suspended') {
         this.ctx.resume().then(() => {
@@ -114,7 +105,7 @@ export class AudioEngine extends EventTarget {
     
     // Update position (adjusting for 100ms start delay)
     if (this.ctx) {
-      this.currentPosition = Math.max(this.playStartOffset, this.playStartOffset + (this.ctx.currentTime - this.playStartTime - 0.1));
+      this.currentPosition = Math.max(this.playStartOffset, this.playStartOffset + (this.ctx.currentTime - this.playStartTime - 0.3));
     }
 
     // Stop all active audio nodes immediately
@@ -182,7 +173,7 @@ export class AudioEngine extends EventTarget {
     if (!this.ctx || !this.masterGain || !this.composition) return;
     
     const now = this.ctx.currentTime;
-    const currentPlayPos = Math.max(this.playStartOffset, this.playStartOffset + (now - this.playStartTime - 0.1));
+    const currentPlayPos = Math.max(this.playStartOffset, this.playStartOffset + (now - this.playStartTime - 0.3));
     
     // Broadcast position update
     const currentBeats = secondsToBeats(currentPlayPos, this.composition.tempo);
@@ -196,7 +187,7 @@ export class AudioEngine extends EventTarget {
       const note = this.scheduledNotes[this.lastScheduledNoteIndex];
       
       // Calculate start time relative to the AudioContext timeline (with 100ms start delay)
-      const audioCtxStartTime = this.playStartTime + (note.startTime - this.playStartOffset) + 0.1;
+      const audioCtxStartTime = this.playStartTime + (note.startTime - this.playStartOffset) + 0.3;
       
       // Only schedule if it's in the future (or very near future)
       if (audioCtxStartTime >= now - 0.01) {
