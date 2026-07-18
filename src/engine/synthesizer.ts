@@ -87,9 +87,11 @@ export function playNote(
   const oscillators: OscillatorNode[] = [];
   const intermediateGains: GainNode[] = [];
   
-  // WebKitGTK / GStreamer has multiple volume normalization and clipping bugs with createPeriodicWave.
-  // We force playMultiOscillator to ensure consistent volume scaling across all platforms.
-  const allHarmonicsInteger = false;
+  // Use PeriodicWave (1 oscillator) when all z values are positive integers, otherwise fall back
+  // to multi-oscillator mode. PeriodicWave drastically reduces audio node count which prevents
+  // buffer underruns (crackling) and GStreamer pipeline overload (frequency attenuation) on Linux.
+  const allHarmonicsInteger = instrument.harmonics.length > 0 &&
+    instrument.harmonics.every(h => h.z >= 1 && Number.isInteger(h.z));
 
   if (allHarmonicsInteger && instrument.harmonics.length > 0) {
     // Optimization: Use a single PeriodicWave oscillator (bypassed on WebKitGTK/Linux)
@@ -104,7 +106,7 @@ export function playNote(
     }
 
     try {
-      const wave = ctx.createPeriodicWave(real, imag, { disableNormalization: true });
+      const wave = ctx.createPeriodicWave(real, imag, { disableNormalization: false });
       const osc = ctx.createOscillator();
       osc.setPeriodicWave(wave);
       osc.frequency.setValueAtTime(frequency, playStartTime);
