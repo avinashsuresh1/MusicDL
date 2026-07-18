@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::fs;
-use std::path::{Path};
+use std::path::Path;
+use std::sync::Mutex;
 
 #[derive(serde::Serialize)]
 struct OpenProjectResult {
@@ -170,25 +171,124 @@ fn create_new_project_directory(default_files: HashMap<String, String>) -> Resul
     }
 }
 
+use rodio::{OutputStream, Sink, OutputStreamHandle};
+use rodio::buffer::SamplesBuffer;
+
+pub struct AudioState {
+    stream_handle: Option<OutputStreamHandle>,
+    sink: Option<Sink>,
+}
+
+impl AudioState {
+    pub fn new() -> Self {
+        Self {
+            stream_handle: None,
+            sink: None,
+        }
+    }
+
+    pub fn ensure_initialized(&mut self) -> Result<(), String> {
+        if self.stream_handle.is_none() {
+            let (tx, rx) = std::sync::mpsc::channel();
+            std::thread::spawn(move || {
+                match OutputStream::try_default() {
+                    Ok((_stream, handle)) => {
+                        let _ = tx.send(Ok(handle));
+                        // Keep the stream alive forever by sleeping the thread
+                        loop {
+                            std::thread::sleep(std::time::Duration::from_secs(3600));
+                        }
+                    }
+                    Err(e) => {
+                        let _ = tx.send(Err(format!("Failed to open default output stream: {}", e)));
+                    }
+                }
+            });
+
+            let handle = rx.recv_timeout(std::time::Duration::from_millis(1000))
+                .map_err(|_| "Audio thread initialization timed out".to_string())?
+                .map_err(|e| e)?;
+
+            let sink = Sink::try_new(&handle)
+                .map_err(|e| format!("Failed to create audio playback sink: {}", e))?;
+
+            self.stream_handle = Some(handle);
+            self.sink = Some(sink);
+        }
+        Ok(())
+    }
+}
+
+#[tauri::command]
+fn play_samples(
+    samples: Vec<f32>,
+    sample_rate: u32,
+    start_offset: f32,
+    state: tauri::State<'_, Mutex<AudioState>>,
+) -> Result<(), String> {
+    let mut state = state.lock().map_err(|e| format!("Failed to acquire audio lock: {}", e))?;
+    state.ensure_initialized()?;
+
+    if let Some(ref sink) = state.sink {
+        sink.stop(); // Stop any currently playing audio
+        
+        let start_sample = (start_offset * sample_rate as f32) as usize;
+        if start_sample < samples.len() {
+            let sliced_samples = samples[start_sample..].to_vec();
+            // Create a mono buffer source
+            let source = SamplesBuffer::new(1, sample_rate, sliced_samples);
+            sink.append(source);
+            sink.play();
+            Ok(())
+        } else {
+            // Started after end of composition, just clear sink
+            Ok(())
+        }
+    } else {
+        Err("Audio playback device is not available".to_string())
+    }
+}
+
+#[tauri::command]
+fn pause_audio(state: tauri::State<'_, Mutex<AudioState>>) -> Result<(), String> {
+    let state = state.lock().map_err(|e| format!("Failed to acquire audio lock: {}", e))?;
+    if let Some(ref sink) = state.sink {
+        sink.pause();
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn resume_audio(state: tauri::State<'_, Mutex<AudioState>>) -> Result<(), String> {
+    let state = state.lock().map_err(|e| format!("Failed to acquire audio lock: {}", e))?;
+    if let Some(ref sink) = state.sink {
+        sink.play();
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn stop_audio(state: tauri::State<'_, Mutex<AudioState>>) -> Result<(), String> {
+    let state = state.lock().map_err(|e| format!("Failed to acquire audio lock: {}", e))?;
+    if let Some(ref sink) = state.sink {
+        sink.stop();
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn set_volume(volume: f32, state: tauri::State<'_, Mutex<AudioState>>) -> Result<(), String> {
+    let state = state.lock().map_err(|e| format!("Failed to acquire audio lock: {}", e))?;
+    if let Some(ref sink) = state.sink {
+        sink.set_volume(volume);
+    }
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-  #[cfg(target_os = "linux")]
-  {
-    std::env::set_var("PULSE_PROP", "media.role=music");
-    std::env::set_var("PIPEWIRE_PROPS", "media.role=music");
-    
-    // Disable WebKitGTK's bubblewrap sandbox which blocks access to PulseAudio/PipeWire Unix sockets.
-    // This allows the audio helper to talk directly to Pulse/Pipewire for Bluetooth A2DP.
-    std::env::set_var("WEBKIT_FORCE_SANDBOX", "0");
-    std::env::set_var("WEBKIT_DISABLE_SANDBOX_THIS_IS_VERY_DANGEROUS", "1");
-    
-    // Force GStreamer to use PulseAudio/PipeWire instead of falling back to raw ALSA devices.
-    if std::env::var("GST_AUDIOSINK").is_err() {
-      std::env::set_var("GST_AUDIOSINK", "pulsesink");
-    }
-  }
-
   tauri::Builder::default()
+    .manage(Mutex::new(AudioState::new()))
     .setup(|app| {
       if cfg!(debug_assertions) {
         app.handle().plugin(
@@ -204,7 +304,12 @@ pub fn run() {
       save_project_directory,
       rename_file,
       delete_file,
-      create_new_project_directory
+      create_new_project_directory,
+      play_samples,
+      pause_audio,
+      resume_audio,
+      stop_audio,
+      set_volume
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

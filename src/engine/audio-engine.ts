@@ -2,22 +2,35 @@ import type { Composition, ScheduledNote } from '../types/music.js';
 import { getScheduledNotes } from './scheduler.js';
 import { renderToSamples } from './renderer.js';
 import { secondsToBeats, beatsToSeconds } from '../utils/note-utils.js';
+import { invoke } from '@tauri-apps/api/core';
 
 export type PlaybackState = 'playing' | 'paused' | 'stopped';
 
+function isTauri(): boolean {
+  return typeof window !== 'undefined' && (window as any).__TAURI__ !== undefined;
+}
+
 /**
- * Audio engine that pre-renders the entire composition into an AudioBuffer
- * using pure JS mathematical synthesis, then plays it back with a single
- * AudioBufferSourceNode. This avoids all Web Audio node scheduling,
- * PeriodicWave, and mixer/filter issues on WebKitGTK/GStreamer (Linux).
+ * Dual-mode audio engine.
+ * 
+ * - In Tauri (Desktop): Renders the composition into flat samples in JS,
+ *   then sends them to the native Rust backend to play via rodio. This
+ *   completely bypasses the webview sandbox and GStreamer, solving Bluetooth
+ *   A2DP and audio driver bugs on Linux.
+ * 
+ * - In Browser (Web): Falls back to standard Web Audio API pre-rendering into
+ *   an AudioBuffer and playing via an AudioBufferSourceNode.
  */
 export class AudioEngine extends EventTarget {
   private ctx: AudioContext | null = null;
   private state: PlaybackState = 'stopped';
   private composition: Composition | null = null;
 
-  // Pre-rendered audio
+  // Pre-rendered audio data
+  private renderedSamples: Float32Array | null = null;
   private renderedBuffer: AudioBuffer | null = null;
+
+  // Web Audio playback (browser mode)
   private bufferSource: AudioBufferSourceNode | null = null;
   private masterGain: GainNode | null = null;
 
@@ -28,6 +41,7 @@ export class AudioEngine extends EventTarget {
   private currentOffset = 0;       // where we are in the buffer
   private playStartCtxTime = 0;    // ctx.currentTime when play() was called
   private positionTimerId: number | null = null;
+  private tauriPlaybackEndTimeoutId: number | null = null;
 
   constructor() {
     super();
@@ -36,12 +50,13 @@ export class AudioEngine extends EventTarget {
   setComposition(comp: Composition) {
     const wasPlaying = this.state === 'playing';
     if (wasPlaying) {
-      this.stopSource();
+      this.stopPlaybackInternal();
     }
 
     this.composition = comp;
     this.scheduledNotes = getScheduledNotes(comp);
-    this.renderedBuffer = null; // invalidate — will re-render on play
+    this.renderedSamples = null;
+    this.renderedBuffer = null;
     this.currentOffset = 0;
     this.state = 'stopped';
 
@@ -57,11 +72,12 @@ export class AudioEngine extends EventTarget {
     this.initAudio();
     if (this.state === 'playing') return;
 
-    // Pre-render on first play (or after composition change)
-    if (!this.renderedBuffer) {
+    // Pre-render if needed
+    if (!this.renderedSamples) {
       this.dispatchEvent(new CustomEvent('rendering', { detail: { rendering: true } }));
       try {
-        this.renderedBuffer = await this.renderComposition();
+        const sampleRate = this.ctx?.sampleRate ?? 44100;
+        this.renderedSamples = renderToSamples(this.scheduledNotes, sampleRate);
       } catch (err) {
         console.error('Failed to render composition:', err);
         this.dispatchEvent(new CustomEvent('rendering', { detail: { rendering: false } }));
@@ -70,42 +86,101 @@ export class AudioEngine extends EventTarget {
       this.dispatchEvent(new CustomEvent('rendering', { detail: { rendering: false } }));
     }
 
-    this.startPlayback();
+    const sampleRate = this.ctx?.sampleRate ?? 44100;
+    const duration = this.renderedSamples.length / sampleRate;
+    if (this.currentOffset >= duration) {
+      this.stop();
+      return;
+    }
+
+    if (isTauri()) {
+      // --- Tauri Mode: Play audio via native Rust backend ---
+      try {
+        // Convert Float32Array to standard array for Tauri IPC serialization
+        const samplesArray = Array.from(this.renderedSamples);
+        await invoke('play_samples', {
+          samples: samplesArray,
+          sampleRate,
+          startOffset: this.currentOffset,
+        });
+
+        this.playStartCtxTime = this.ctx?.currentTime ?? 0;
+        this.state = 'playing';
+        this.dispatchEvent(new CustomEvent('state-changed', { detail: { state: this.state } }));
+
+        // Start position ticker
+        this.startPositionTicker();
+
+        // Set up local timeout for natural end of playback
+        const remainingTimeSec = duration - this.currentOffset;
+        this.setupTauriPlaybackEndTimer(remainingTimeSec);
+      } catch (err) {
+        console.error('Tauri native playback failed:', err);
+      }
+    } else {
+      // --- Browser Mode: Fallback to Web Audio pre-rendered buffer ---
+      if (!this.renderedBuffer) {
+        this.renderedBuffer = this.ctx!.createBuffer(2, this.renderedSamples.length, sampleRate);
+        this.renderedBuffer.copyToChannel(this.renderedSamples as any, 0);
+        this.renderedBuffer.copyToChannel(this.renderedSamples as any, 1);
+      }
+      this.startBrowserPlayback();
+    }
   }
 
-  pause() {
+  async pause() {
     if (this.state !== 'playing') return;
 
-    // Capture position before stopping source
     this.currentOffset = this.getPlaybackPositionSeconds();
-    this.stopSource();
+    this.stopPlaybackInternal();
     this.state = 'paused';
+
+    if (isTauri()) {
+      try {
+        await invoke('pause_audio');
+      } catch (err) {
+        console.error('Tauri pause failed:', err);
+      }
+    }
 
     this.dispatchEvent(new CustomEvent('state-changed', { detail: { state: this.state } }));
   }
 
-  stop() {
-    this.stopSource();
+  async stop() {
+    this.stopPlaybackInternal();
     this.currentOffset = 0;
     this.state = 'stopped';
+
+    if (isTauri()) {
+      try {
+        await invoke('stop_audio');
+      } catch (err) {
+        console.error('Tauri stop failed:', err);
+      }
+    }
 
     this.dispatchEvent(new CustomEvent('state-changed', { detail: { state: this.state } }));
     this.dispatchEvent(new CustomEvent('position-changed', { detail: { position: 0 } }));
   }
 
-  seek(beats: number) {
+  async seek(beats: number) {
     if (!this.composition) return;
     const wasPlaying = this.state === 'playing';
 
     if (wasPlaying) {
-      this.stopSource();
+      this.stopPlaybackInternal();
+      if (isTauri()) {
+        try {
+          await invoke('stop_audio');
+        } catch {}
+      }
     }
 
     this.currentOffset = beatsToSeconds(beats, this.composition.tempo);
     this.dispatchEvent(new CustomEvent('position-changed', { detail: { position: beats } }));
 
     if (wasPlaying) {
-      this.startPlayback();
+      await this.play();
     }
   }
 
@@ -122,7 +197,6 @@ export class AudioEngine extends EventTarget {
     if (this.scheduledNotes.length === 0 || !this.composition) return 0;
     const lastNote = this.scheduledNotes[this.scheduledNotes.length - 1];
     const lastNoteEndSeconds = lastNote.startTime + lastNote.duration;
-    // Add release tail of the last note's instrument
     const releaseSec = (lastNote.instrument.adsr?.release ?? 50) / 1000;
     return secondsToBeats(lastNoteEndSeconds + releaseSec, this.composition.tempo);
   }
@@ -132,9 +206,7 @@ export class AudioEngine extends EventTarget {
   private initAudio() {
     try {
       if (!this.ctx) {
-        this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)({
-          latencyHint: 'playback'
-        });
+        this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
         this.masterGain = this.ctx.createGain();
         this.masterGain.gain.setValueAtTime(0.7, this.ctx.currentTime);
         this.masterGain.connect(this.ctx.destination);
@@ -149,48 +221,16 @@ export class AudioEngine extends EventTarget {
     }
   }
 
-  /**
-   * Pre-render the entire composition using pure JS rendering.
-   * This runs all synthesis in pure JS (Math.sin & linear ADSR segments)
-   * into raw float samples, then copies them to an AudioBuffer.
-   * Completely immune to Web Audio API engine bugs in GStreamer.
-   */
-  private async renderComposition(): Promise<AudioBuffer> {
-    const sampleRate = this.ctx?.sampleRate ?? 44100;
-
-    if (!this.composition || this.scheduledNotes.length === 0) {
-      // Return a tiny silent buffer
-      return this.ctx?.createBuffer(1, 4410, sampleRate) ?? new AudioBuffer({ length: 4410, sampleRate, numberOfChannels: 1 });
-    }
-
-    const samples = renderToSamples(this.scheduledNotes, sampleRate);
-
-    // Create a 2-channel stereo buffer and copy mono samples to both channels
-    const audioBuffer = this.ctx!.createBuffer(2, samples.length, sampleRate);
-    audioBuffer.copyToChannel(samples as any, 0);
-    audioBuffer.copyToChannel(samples as any, 1);
-
-    return audioBuffer;
-  }
-
-  private startPlayback() {
+  private startBrowserPlayback() {
     if (!this.ctx || !this.masterGain || !this.renderedBuffer) return;
-
-    // Clamp offset to buffer bounds
-    const bufferDuration = this.renderedBuffer.duration;
-    if (this.currentOffset >= bufferDuration) {
-      this.stop();
-      return;
-    }
 
     const source = this.ctx.createBufferSource();
     source.buffer = this.renderedBuffer;
     source.connect(this.masterGain);
 
     source.onended = () => {
-      // Natural end of playback
       if (this.state === 'playing') {
-        this.stopSource();
+        this.stopPlaybackInternal();
         this.currentOffset = 0;
         this.state = 'stopped';
         this.dispatchEvent(new CustomEvent('state-changed', { detail: { state: this.state } }));
@@ -205,7 +245,13 @@ export class AudioEngine extends EventTarget {
     this.state = 'playing';
     this.dispatchEvent(new CustomEvent('state-changed', { detail: { state: this.state } }));
 
-    // Position broadcast ticker
+    this.startPositionTicker();
+  }
+
+  private startPositionTicker() {
+    if (this.positionTimerId) {
+      clearInterval(this.positionTimerId);
+    }
     this.positionTimerId = window.setInterval(() => {
       if (this.state === 'playing' && this.composition) {
         const posSec = this.getPlaybackPositionSeconds();
@@ -215,10 +261,29 @@ export class AudioEngine extends EventTarget {
     }, 50);
   }
 
-  private stopSource() {
+  private setupTauriPlaybackEndTimer(durationSec: number) {
+    if (this.tauriPlaybackEndTimeoutId) {
+      clearTimeout(this.tauriPlaybackEndTimeoutId);
+    }
+    this.tauriPlaybackEndTimeoutId = window.setTimeout(() => {
+      if (this.state === 'playing') {
+        this.stopPlaybackInternal();
+        this.currentOffset = 0;
+        this.state = 'stopped';
+        this.dispatchEvent(new CustomEvent('state-changed', { detail: { state: this.state } }));
+        this.dispatchEvent(new CustomEvent('position-changed', { detail: { position: 0 } }));
+      }
+    }, durationSec * 1000);
+  }
+
+  private stopPlaybackInternal() {
     if (this.positionTimerId) {
       clearInterval(this.positionTimerId);
       this.positionTimerId = null;
+    }
+    if (this.tauriPlaybackEndTimeoutId) {
+      clearTimeout(this.tauriPlaybackEndTimeoutId);
+      this.tauriPlaybackEndTimeoutId = null;
     }
     if (this.bufferSource) {
       try { this.bufferSource.stop(); } catch {}
