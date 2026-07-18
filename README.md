@@ -43,9 +43,19 @@ To run the interactive desktop editor locally:
 ### 2. Build the Standalone Production App
 To package the app into a single, optimized desktop executable with zero runtime dependencies:
 1. Compile and bundle the app:
-   ```bash
-   npx tauri build
-   ```
+   * **Recommended Cross-Platform Command**:
+     ```bash
+     npm run build:desktop
+     ```
+     *(This automatically configures the environment to bypass FUSE requirements on modern Linux distributions).*
+   * **Alternative (Direct Tauri CLI)**:
+     ```bash
+     npx tauri build
+     ```
+     *Note for Linux: If `npx tauri build` fails with a `"failed to run linuxdeploy"` error (due to missing `libfuse2` on newer distros), execute it with the extraction flag:*
+     ```bash
+     APPIMAGE_EXTRACT_AND_RUN=1 npx tauri build
+     ```
 2. Find the packaged outputs:
    * **Windows**: `src-tauri/target/release/MusicDL.exe` (executable) and `src-tauri/target/release/bundle/nsis/` (installer).
    * **macOS**: `src-tauri/target/release/bundle/macos/MusicDL.app` and `src-tauri/target/release/bundle/dmg/` (installer).
