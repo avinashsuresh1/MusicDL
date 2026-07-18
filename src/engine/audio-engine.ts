@@ -132,7 +132,9 @@ export class AudioEngine extends EventTarget {
   private initAudio() {
     try {
       if (!this.ctx) {
-        this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)({
+          latencyHint: 'playback'
+        });
         this.masterGain = this.ctx.createGain();
         this.masterGain.gain.setValueAtTime(0.7, this.ctx.currentTime);
         this.masterGain.connect(this.ctx.destination);

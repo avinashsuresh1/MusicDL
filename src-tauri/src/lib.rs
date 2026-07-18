@@ -172,6 +172,12 @@ fn create_new_project_directory(default_files: HashMap<String, String>) -> Resul
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+  #[cfg(target_os = "linux")]
+  {
+    std::env::set_var("PULSE_PROP", "media.role=music");
+    std::env::set_var("PIPEWIRE_PROPS", "media.role=music");
+  }
+
   tauri::Builder::default()
     .setup(|app| {
       if cfg!(debug_assertions) {
