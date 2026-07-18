@@ -7,12 +7,14 @@ export interface ActiveNoteNodes {
 }
 
 /**
- * Creates and starts Web Audio API nodes for a single scheduled note.
- * Uses a single PeriodicWave if all z values are integers, otherwise falls back to multiple oscillators.
- * Returns the nodes and a stop function.
+ * Schedule a single note onto an audio graph.
+ * Works with both AudioContext (real-time) and OfflineAudioContext (pre-render).
+ *
+ * Uses a single PeriodicWave oscillator when all harmonic z values are positive
+ * integers; otherwise falls back to multiple sine oscillators.
  */
 export function playNote(
-  ctx: AudioContext,
+  ctx: BaseAudioContext,
   destination: AudioNode,
   frequency: number,
   startTime: number,
@@ -26,156 +28,111 @@ export function playNote(
   const S = adsr.sustain;
   const R = adsr.release / 1000;
 
-  // Clamp start time to current context time to prevent GStreamer latency issues
-  const playStartTime = Math.max(ctx.currentTime, startTime);
-  const releaseTime = playStartTime + duration;
-  const endTime = playStartTime + duration + R;
+  const noteStart = Math.max(0, startTime);
+  const releaseTime = noteStart + duration;
+  const endTime = releaseTime + R;
 
+  // --- ADSR gain envelope ---
   const gainNode = ctx.createGain();
   gainNode.connect(destination);
 
-  const peakVolume = volume;
-  const sustainVolume = S * volume;
+  const peakVol = volume;
+  const susVol = S * volume;
 
-  gainNode.gain.setValueAtTime(0, playStartTime);
+  // Use linearRampToValueAtTime for precise, deterministic envelopes.
+  gainNode.gain.setValueAtTime(0, noteStart);
 
-  if (duration <= A) {
-    // Note is released during the attack phase
-    const volumeAtRelease = A > 0 ? (duration / A) * peakVolume : peakVolume;
-    if (A > 0) {
-      gainNode.gain.setTargetAtTime(volumeAtRelease, playStartTime, A / 3);
-    } else {
-      gainNode.gain.setValueAtTime(peakVolume, playStartTime);
-    }
-    gainNode.gain.setTargetAtTime(0, releaseTime, R / 3);
-  } else if (duration <= A + D) {
-    // Note is released during the decay phase
-    if (A > 0) {
-      gainNode.gain.setTargetAtTime(peakVolume, playStartTime, A / 3);
-    } else {
-      gainNode.gain.setValueAtTime(peakVolume, playStartTime);
-    }
-    
-    const decayDuration = duration - A;
-    const volumeAtRelease = D > 0 ? peakVolume - (decayDuration / D) * (peakVolume - sustainVolume) : sustainVolume;
-    if (D > 0) {
-      gainNode.gain.setTargetAtTime(volumeAtRelease, playStartTime + A, D / 3);
-    } else {
-      gainNode.gain.setValueAtTime(sustainVolume, playStartTime + A);
-    }
-    gainNode.gain.setTargetAtTime(0, releaseTime, R / 3);
+  if (A > 0) {
+    gainNode.gain.linearRampToValueAtTime(peakVol, noteStart + A);
   } else {
-    // Standard ADSR
-    if (A > 0) {
-      gainNode.gain.setTargetAtTime(peakVolume, playStartTime, A / 3);
-      if (D > 0) {
-        gainNode.gain.setTargetAtTime(sustainVolume, playStartTime + A, D / 3);
-      } else {
-        gainNode.gain.setValueAtTime(sustainVolume, playStartTime + A);
-      }
-    } else {
-      gainNode.gain.setValueAtTime(peakVolume, playStartTime);
-      if (D > 0) {
-        gainNode.gain.setTargetAtTime(sustainVolume, playStartTime, D / 3);
-      } else {
-        gainNode.gain.setValueAtTime(sustainVolume, playStartTime);
-      }
-    }
-    gainNode.gain.setTargetAtTime(0, releaseTime, R / 3);
+    gainNode.gain.setValueAtTime(peakVol, noteStart);
   }
 
+  const decayStart = noteStart + A;
+  if (decayStart < releaseTime) {
+    if (D > 0) {
+      const decayEnd = Math.min(decayStart + D, releaseTime);
+      gainNode.gain.linearRampToValueAtTime(susVol, decayEnd);
+    } else {
+      gainNode.gain.setValueAtTime(susVol, decayStart);
+    }
+    // Hold sustain until release
+    gainNode.gain.setValueAtTime(susVol, releaseTime);
+  }
+
+  // Release
+  if (R > 0) {
+    gainNode.gain.linearRampToValueAtTime(0, endTime);
+  } else {
+    gainNode.gain.setValueAtTime(0, releaseTime);
+  }
+
+  // --- Oscillator(s) ---
   const oscillators: OscillatorNode[] = [];
   const intermediateGains: GainNode[] = [];
-  
-  // Use PeriodicWave (1 oscillator) when all z values are positive integers, otherwise fall back
-  // to multi-oscillator mode. PeriodicWave drastically reduces audio node count which prevents
-  // buffer underruns (crackling) and GStreamer pipeline overload (frequency attenuation) on Linux.
+
   const allHarmonicsInteger = instrument.harmonics.length > 0 &&
     instrument.harmonics.every(h => h.z >= 1 && Number.isInteger(h.z));
 
-  if (allHarmonicsInteger && instrument.harmonics.length > 0) {
-    // Optimization: Use a single PeriodicWave oscillator (bypassed on WebKitGTK/Linux)
+  if (allHarmonicsInteger) {
+    // Single PeriodicWave oscillator — keeps node count low
     const maxZ = Math.max(...instrument.harmonics.map(h => h.z));
     const real = new Float32Array(maxZ + 1);
     const imag = new Float32Array(maxZ + 1);
 
     for (const h of instrument.harmonics) {
-      if (h.z >= 1) {
-        imag[h.z] += h.amplitude;
-      }
+      imag[h.z] += h.amplitude;
     }
 
     try {
       const wave = ctx.createPeriodicWave(real, imag, { disableNormalization: false });
       const osc = ctx.createOscillator();
       osc.setPeriodicWave(wave);
-      osc.frequency.setValueAtTime(frequency, playStartTime);
+      osc.frequency.setValueAtTime(frequency, noteStart);
       osc.connect(gainNode);
-      osc.start(playStartTime);
-      osc.stop(endTime);
+      osc.start(noteStart);
+      osc.stop(endTime + 0.01);
       oscillators.push(osc);
-    } catch (e) {
-      playMultiOscillator(ctx, gainNode, frequency, playStartTime, endTime, instrument, oscillators, intermediateGains);
+    } catch {
+      scheduleMultiOscillator(ctx, gainNode, frequency, noteStart, endTime, instrument, oscillators, intermediateGains);
     }
   } else {
-    playMultiOscillator(ctx, gainNode, frequency, playStartTime, endTime, instrument, oscillators, intermediateGains);
+    scheduleMultiOscillator(ctx, gainNode, frequency, noteStart, endTime, instrument, oscillators, intermediateGains);
   }
 
-  // Define a cleanup function to disconnect nodes and release resources
+  // --- Cleanup ---
   let cleanedUp = false;
   const cleanup = () => {
     if (cleanedUp) return;
     cleanedUp = true;
-    try {
-      gainNode.disconnect();
-      oscillators.forEach(osc => {
-        try {
-          osc.disconnect();
-        } catch (_) {}
-      });
-      intermediateGains.forEach(g => {
-        try {
-          g.disconnect();
-        } catch (_) {}
-      });
-    } catch (_) {}
+    try { gainNode.disconnect(); } catch {}
+    for (const osc of oscillators) { try { osc.disconnect(); } catch {} }
+    for (const g of intermediateGains) { try { g.disconnect(); } catch {} }
   };
 
-  // Trigger cleanup exactly when the first oscillator stops playing on the audio thread
   if (oscillators.length > 0) {
-    oscillators[0].onended = () => {
-      cleanup();
-    };
+    oscillators[0].onended = cleanup;
   }
 
   const stop = (time: number) => {
     try {
-      const fadeTime = 0.05; // 50ms fade out for clean stops
-      const clampTime = Math.max(ctx.currentTime, time);
-      gainNode.gain.cancelScheduledValues(clampTime);
-      gainNode.gain.setValueAtTime(gainNode.gain.value || 0, clampTime);
-      gainNode.gain.linearRampToValueAtTime(0, clampTime + fadeTime);
-      
-      oscillators.forEach(osc => {
-        try {
-          osc.stop(clampTime + fadeTime);
-        } catch (_) {}
-      });
-
-      // Schedule final cleanup after fade-out completes
-      setTimeout(cleanup, (fadeTime + 0.1) * 1000);
-    } catch (_) {}
+      const fade = 0.05;
+      const t = Math.max(ctx.currentTime, time);
+      gainNode.gain.cancelScheduledValues(t);
+      gainNode.gain.setValueAtTime(gainNode.gain.value || 0, t);
+      gainNode.gain.linearRampToValueAtTime(0, t + fade);
+      for (const osc of oscillators) {
+        try { osc.stop(t + fade); } catch {}
+      }
+      setTimeout(cleanup, (fade + 0.1) * 1000);
+    } catch {}
   };
 
-  return {
-    oscillators,
-    gainNode,
-    stop
-  };
+  return { oscillators, gainNode, stop };
 }
 
-function playMultiOscillator(
-  ctx: AudioContext,
+function scheduleMultiOscillator(
+  ctx: BaseAudioContext,
   gainNode: AudioNode,
   fundamentalFreq: number,
   startTime: number,
@@ -186,19 +143,19 @@ function playMultiOscillator(
 ): void {
   for (const h of instrument.harmonics) {
     if (h.amplitude <= 0) continue;
-    
+
     const osc = ctx.createOscillator();
     const oscGain = ctx.createGain();
-    
+
     osc.frequency.setValueAtTime(fundamentalFreq * h.z, startTime);
     oscGain.gain.setValueAtTime(h.amplitude, startTime);
-    
+
     osc.connect(oscGain);
     oscGain.connect(gainNode);
-    
+
     osc.start(startTime);
-    osc.stop(endTime);
-    
+    osc.stop(endTime + 0.01);
+
     oscillatorsList.push(osc);
     intermediateGainsList.push(oscGain);
   }
