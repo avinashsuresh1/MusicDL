@@ -1,15 +1,15 @@
 import type { Composition, ScheduledNote } from '../types/music.js';
 import { getScheduledNotes } from './scheduler.js';
-import { playNote } from './synthesizer.js';
+import { renderToSamples } from './renderer.js';
 import { secondsToBeats, beatsToSeconds } from '../utils/note-utils.js';
 
 export type PlaybackState = 'playing' | 'paused' | 'stopped';
 
 /**
  * Audio engine that pre-renders the entire composition into an AudioBuffer
- * using OfflineAudioContext, then plays it back with a single
- * AudioBufferSourceNode. This avoids all real-time Web Audio scheduling
- * issues on WebKitGTK/GStreamer (Linux).
+ * using pure JS mathematical synthesis, then plays it back with a single
+ * AudioBufferSourceNode. This avoids all Web Audio node scheduling,
+ * PeriodicWave, and mixer/filter issues on WebKitGTK/GStreamer (Linux).
  */
 export class AudioEngine extends EventTarget {
   private ctx: AudioContext | null = null;
@@ -148,42 +148,27 @@ export class AudioEngine extends EventTarget {
   }
 
   /**
-   * Pre-render the entire composition using OfflineAudioContext.
-   * This runs all synthesis offline in a single pass — no real-time pressure,
-   * no GStreamer pipeline timing bugs.
+   * Pre-render the entire composition using pure JS rendering.
+   * This runs all synthesis in pure JS (Math.sin & linear ADSR segments)
+   * into raw float samples, then copies them to an AudioBuffer.
+   * Completely immune to Web Audio API engine bugs in GStreamer.
    */
   private async renderComposition(): Promise<AudioBuffer> {
+    const sampleRate = this.ctx?.sampleRate ?? 44100;
+
     if (!this.composition || this.scheduledNotes.length === 0) {
       // Return a tiny silent buffer
-      const offline = new OfflineAudioContext(2, 4410, 44100);
-      return offline.startRendering();
+      return this.ctx?.createBuffer(1, 4410, sampleRate) ?? new AudioBuffer({ length: 4410, sampleRate, numberOfChannels: 1 });
     }
 
-    const sampleRate = this.ctx?.sampleRate ?? 44100;
-    const lastNote = this.scheduledNotes[this.scheduledNotes.length - 1];
-    const releaseSec = (lastNote.instrument.adsr?.release ?? 50) / 1000;
-    const totalDuration = lastNote.startTime + lastNote.duration + releaseSec + 0.5;
-    const totalSamples = Math.ceil(totalDuration * sampleRate);
+    const samples = renderToSamples(this.scheduledNotes, sampleRate);
 
-    const offline = new OfflineAudioContext(2, totalSamples, sampleRate);
-    const mixGain = offline.createGain();
-    mixGain.gain.setValueAtTime(1.0, 0);
-    mixGain.connect(offline.destination);
+    // Create a 2-channel stereo buffer and copy mono samples to both channels
+    const audioBuffer = this.ctx!.createBuffer(2, samples.length, sampleRate);
+    audioBuffer.copyToChannel(samples as any, 0);
+    audioBuffer.copyToChannel(samples as any, 1);
 
-    // Schedule every note onto the offline context
-    for (const note of this.scheduledNotes) {
-      playNote(
-        offline,
-        mixGain,
-        note.frequency,
-        note.startTime,
-        note.duration,
-        note.instrument,
-        note.volume
-      );
-    }
-
-    return offline.startRendering();
+    return audioBuffer;
   }
 
   private startPlayback() {
