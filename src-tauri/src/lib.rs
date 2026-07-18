@@ -177,8 +177,12 @@ pub fn run() {
     std::env::set_var("PULSE_PROP", "media.role=music");
     std::env::set_var("PIPEWIRE_PROPS", "media.role=music");
     
+    // Disable WebKitGTK's bubblewrap sandbox which blocks access to PulseAudio/PipeWire Unix sockets.
+    // This allows the audio helper to talk directly to Pulse/Pipewire for Bluetooth A2DP.
+    std::env::set_var("WEBKIT_FORCE_SANDBOX", "0");
+    std::env::set_var("WEBKIT_DISABLE_SANDBOX_THIS_IS_VERY_DANGEROUS", "1");
+    
     // Force GStreamer to use PulseAudio/PipeWire instead of falling back to raw ALSA devices.
-    // This allows audio to route properly to Bluetooth A2DP headphones.
     if std::env::var("GST_AUDIOSINK").is_err() {
       std::env::set_var("GST_AUDIOSINK", "pulsesink");
     }
