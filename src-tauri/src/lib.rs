@@ -176,6 +176,12 @@ pub fn run() {
   {
     std::env::set_var("PULSE_PROP", "media.role=music");
     std::env::set_var("PIPEWIRE_PROPS", "media.role=music");
+    
+    // Force GStreamer to use PulseAudio/PipeWire instead of falling back to raw ALSA devices.
+    // This allows audio to route properly to Bluetooth A2DP headphones.
+    if std::env::var("GST_AUDIOSINK").is_err() {
+      std::env::set_var("GST_AUDIOSINK", "pulsesink");
+    }
   }
 
   tauri::Builder::default()
