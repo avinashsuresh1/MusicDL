@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "MusicDL",
-  "version": "1.1.1",
+  "version": "1.1.0",
   "identifier": "app.musicdl",
   "build": {
     "frontendDist": "../dist",
@@ -36,7 +36,7 @@
     ],
     "linux": {
       "appimage": {
-        "bundleMediaFramework": true
+        "bundleMediaFramework": false
       }
     },
     "android": {
