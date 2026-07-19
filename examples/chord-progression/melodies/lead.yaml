@@ -1,13 +1,13 @@
 instrument: pad
 notes:
-  - { pitch: 12, offset: 0,  duration: 1 }
-  - { pitch: 16, offset: 1,  duration: 0.5 }
-  - { pitch: 19, offset: 1.5, duration: 0.5 }
-  - { pitch: 17, offset: 2,  duration: 1 }
-  - { pitch: 16, offset: 3,  duration: 1 }
-  - { pitch: 12, offset: 4,  duration: 1.5 }
-  - { pitch: 11, offset: 5.5, duration: 0.5 }
-  - { pitch: 12, offset: 6,  duration: 1 }
-  - { pitch: 7,  offset: 7,  duration: 1 }
-  - { pitch: 12, offset: 8,  duration: 2 }
-  - { pitch: rest, offset: 10, duration: 2 }
+  - { pitch: 12, duration: 1 }
+  - { pitch: 16, duration: 0.5 }
+  - { pitch: 19, duration: 0.5 }
+  - { pitch: 17, duration: 1 }
+  - { pitch: 16, duration: 1 }
+  - { pitch: 12, duration: 1.5 }
+  - { pitch: 11, duration: 0.5 }
+  - { pitch: 12, duration: 1 }
+  - { pitch: 7, duration: 1 }
+  - { pitch: 12, duration: 2 }
+  - { pitch: rest, duration: 2 }

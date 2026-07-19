@@ -197,3 +197,10 @@
 .input-group input::-webkit-inner-spin-button {
   display: none;
 }
+
+.t-btn.rendering {
+  color: #ff9f0a !important;
+  background: rgba(255, 159, 10, 0.1);
+  cursor: wait;
+  animation: pulse 1.0s infinite;
+}

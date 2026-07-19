@@ -75,6 +75,8 @@ export class AudioEngine extends EventTarget {
     // Pre-render if needed
     if (!this.renderedSamples) {
       this.dispatchEvent(new CustomEvent('rendering', { detail: { rendering: true } }));
+      // Yield to event loop to allow DOM repaint to show the loader
+      await new Promise(resolve => setTimeout(resolve, 50));
       try {
         const sampleRate = this.ctx?.sampleRate ?? 44100;
         this.renderedSamples = renderToSamples(this.scheduledNotes, sampleRate);

@@ -1,0 +1,9 @@
+harmonics:
+  - { z: 4.5, amplitude: 1.0 }
+  - { z: 9.2, amplitude: 0.6 }
+  - { z: 13.8, amplitude: 0.3 }
+adsr:
+  attack: 1
+  decay: 15
+  sustain: 0.0
+  release: 15

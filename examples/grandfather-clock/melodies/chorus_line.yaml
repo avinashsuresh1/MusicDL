@@ -1,0 +1,12 @@
+instrument: clock_chime
+notes:
+  # "Ninety years without slumbering (tick, tick, tick, tick)"
+  - { pitch: 7,  duration: 0.5 }   # D5 (Ni-)
+  - { pitch: 7,  duration: 0.5 }   # D5 (-nety)
+  - { pitch: 12, duration: 1.0 }   # G5 (years)
+  - { pitch: 7,  duration: 0.5 }   # D5 (with-)
+  - { pitch: 7,  duration: 0.5 }   # D5 (-out)
+  - { pitch: 9,  duration: 1.0 }   # E5 (slum-)
+  - { pitch: 9,  duration: 1.0 }   # E5 (-ber-)
+  - { pitch: 7,  duration: 2.0 }   # D5 (-ing)
+  - { pitch: rest, duration: 3.0 }

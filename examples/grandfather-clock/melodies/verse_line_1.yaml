@@ -1,0 +1,14 @@
+instrument: saxophone
+notes:
+  - { pitch: -5, duration: 1.0 }   # D4
+  - { pitch: 0,  duration: 1.0 }   # G4
+  - { pitch: -1, duration: 0.5 }   # F#4
+  - { pitch: 0,  duration: 0.5 }   # G4
+  - { pitch: 2,  duration: 1.0 }   # A4
+  - { pitch: 0,  duration: 0.5 }   # G4
+  - { pitch: 2,  duration: 0.5 }   # A4
+  - { pitch: 4,  duration: 1.0 }   # B4
+  - { pitch: 5,  duration: 0.5 }   # C5
+  - { pitch: 4,  duration: 0.5 }   # B4
+  - { pitch: -3, duration: 0.5 }   # E4
+  - { pitch: rest, duration: 0.5 }

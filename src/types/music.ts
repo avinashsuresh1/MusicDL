@@ -46,6 +46,12 @@ export interface Melody {
   instrument: string;
   /** Array of notes with global beat offsets */
   notes: Note[];
+  /** Whether the melody loops to the end of the composition */
+  loop?: boolean;
+  /** Optional loop start beat offset */
+  loopStart?: number;
+  /** Optional loop end beat offset */
+  loopEnd?: number;
 }
 
 export interface TrackMelodyRef {

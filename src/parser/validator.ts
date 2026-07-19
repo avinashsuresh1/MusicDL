@@ -86,6 +86,22 @@ export function validateMelody(
     }
   });
 
+  if (melody.loop !== undefined && typeof melody.loop !== 'boolean') {
+    errors.push({ path, message: `Melody '${name}': 'loop' must be a boolean` });
+  }
+
+  if (melody.loopStart !== undefined && (typeof melody.loopStart !== 'number' || isNaN(melody.loopStart) || melody.loopStart < 0)) {
+    errors.push({ path, message: `Melody '${name}': 'loop_start' must be a non-negative number` });
+  }
+
+  if (melody.loopEnd !== undefined) {
+    if (typeof melody.loopEnd !== 'number' || isNaN(melody.loopEnd) || melody.loopEnd <= 0) {
+      errors.push({ path, message: `Melody '${name}': 'loop_end' must be a positive number` });
+    } else if (melody.loopStart !== undefined && melody.loopEnd <= melody.loopStart) {
+      errors.push({ path, message: `Melody '${name}': 'loop_end' must be greater than 'loop_start'` });
+    }
+  }
+
   return errors;
 }
 

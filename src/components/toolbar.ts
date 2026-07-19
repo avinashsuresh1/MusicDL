@@ -6,80 +6,302 @@ import htmlText from './toolbar.html?raw';
 import appIconUrl from '../assets/app_icon.png';
 
 const demoFiles = {
-  'composition.yaml': `title: "I-V-vi-IV Progression"
-tempo: 90
-root_frequency: 261.63
+  'composition.yaml': `title: "My Grandfather's Clock"
+tempo: 80
+root_frequency: 392.0
 interval: 100`,
-  
-  'instruments/pad.yaml': `harmonics:
-  - { z: 1, amplitude: 1.0 }
-  - { z: 2, amplitude: 0.5 }
-  - { z: 3, amplitude: 0.25 }
-  - { z: 4, amplitude: 0.12 }
+
+  'instruments/saxophone.yaml': `harmonics:
+  - { z: 1.0, amplitude: 1.0 }
+  - { z: 2.0, amplitude: 0.75 }
+  - { z: 3.0, amplitude: 0.5 }
+  - { z: 4.0, amplitude: 0.35 }
+  - { z: 5.0, amplitude: 0.2 }
+  - { z: 6.0, amplitude: 0.1 }
 adsr:
-  attack: 150
-  decay: 200
-  sustain: 0.6
-  release: 600`,
-  
-  'instruments/bass_synth.yaml': `harmonics:
-  - { z: 1, amplitude: 1.0 }
-  - { z: 2, amplitude: 0.7 }
-  - { z: 3, amplitude: 0.4 }
+  attack: 30
+  decay: 100
+  sustain: 0.75
+  release: 120`,
+
+  'instruments/strings.yaml': `harmonics:
+  - { z: 1.0, amplitude: 0.8 }
+  - { z: 2.0, amplitude: 0.4 }
+  - { z: 3.0, amplitude: 0.25 }
+  - { z: 4.0, amplitude: 0.15 }
   - { z: 0.5, amplitude: 0.3 }
 adsr:
-  attack: 20
-  decay: 100
+  attack: 180
+  decay: 150
   sustain: 0.8
-  release: 150`,
-  
-  'melodies/lead.yaml': `instrument: pad
+  release: 900`,
+
+  'instruments/clock_chime.yaml': `harmonics:
+  - { z: 1.0, amplitude: 1.0 }
+  - { z: 2.0, amplitude: 0.4 }
+  - { z: 0.5, amplitude: 0.25 }
+  - { z: 3.0, amplitude: 0.15 }
+  - { z: 4.0, amplitude: 0.1 }
+adsr:
+  attack: 25
+  decay: 800
+  sustain: 0.4
+  release: 1200`,
+
+  'instruments/clock_tick.yaml': `harmonics:
+  - { z: 4.5, amplitude: 1.0 }
+  - { z: 9.2, amplitude: 0.6 }
+  - { z: 13.8, amplitude: 0.3 }
+adsr:
+  attack: 1
+  decay: 15
+  sustain: 0.0
+  release: 15`,
+
+  'melodies/verse_line_1.yaml': `instrument: saxophone
 notes:
-  - { pitch: 12, offset: 0,  duration: 1 }
-  - { pitch: 16, offset: 1,  duration: 0.5 }
-  - { pitch: 19, offset: 1.5, duration: 0.5 }
-  - { pitch: 17, offset: 2,  duration: 1 }
-  - { pitch: 16, offset: 3,  duration: 1 }
-  - { pitch: 12, offset: 4,  duration: 1.5 }
-  - { pitch: 11, offset: 5.5, duration: 0.5 }
-  - { pitch: 12, offset: 6,  duration: 1 }
-  - { pitch: 7,  offset: 7,  duration: 1 }
-  - { pitch: 12, offset: 8,  duration: 2 }
-  - { pitch: rest, offset: 10, duration: 2 }`,
-  
-  'chords/chord_I.yaml': `instrument: pad
-pitches: [0, 4, 7]`,
-  
-  'chords/chord_V.yaml': `instrument: pad
-pitches: [7, 11, 14]`,
-  
-  'chords/chord_vi.yaml': `instrument: pad
-pitches: [9, 12, 16]`,
-  
-  'chords/chord_IV.yaml': `instrument: pad
-pitches: [5, 9, 12]`,
-  
-  'melodies/bass_line.yaml': `instrument: bass_synth
+  - { pitch: -5, duration: 1.0 }
+  - { pitch: 0,  duration: 1.0 }
+  - { pitch: -1, duration: 0.5 }
+  - { pitch: 0,  duration: 0.5 }
+  - { pitch: 2,  duration: 1.0 }
+  - { pitch: 0,  duration: 0.5 }
+  - { pitch: 2,  duration: 0.5 }
+  - { pitch: 4,  duration: 1.0 }
+  - { pitch: 5,  duration: 0.5 }
+  - { pitch: 4,  duration: 0.5 }
+  - { pitch: -3, duration: 0.5 }
+  - { pitch: rest, duration: 0.5 }`,
+
+  'melodies/verse_line_2.yaml': `instrument: saxophone
 notes:
-  - { pitch: -12, offset: 0,  duration: 3 }
-  - { pitch: -5,  offset: 3,  duration: 3 }
-  - { pitch: -3,  offset: 6,  duration: 3 }
-  - { pitch: -7,  offset: 9,  duration: 3 }`,
-  
-  'tracks/melody.yaml': `volume: 0.7
+  - { pitch: -3, duration: 0.5 }
+  - { pitch: 2,  duration: 0.5 }
+  - { pitch: 0,  duration: 1.0 }
+  - { pitch: rest, duration: 0.1 }
+  - { pitch: 0,  duration: 0.5 }
+  - { pitch: rest, duration: 0.05 }
+  - { pitch: 0,  duration: 0.5 }
+  - { pitch: rest, duration: 0.1 }
+  - { pitch: -1,  duration: 1.0 }
+  - { pitch: -3,  duration: 0.5 }
+  - { pitch: -1,  duration: 0.5 }
+  - { pitch: 0,  duration: 2.0 }
+  - { pitch: rest, duration: 2.0 }`,
+
+  'melodies/verse_line_3.yaml': `instrument: saxophone
+notes:
+  - { pitch: 0,  duration: 0.5 }
+  - { pitch: 4,  duration: 0.5 }
+  - { pitch: 7,  duration: 1.0 }
+  - { pitch: 4,  duration: 0.5 }
+  - { pitch: 2,  duration: 0.5 }
+  - { pitch: 0,  duration: 1.0 }
+  - { pitch: -1,  duration: 0.5 }
+  - { pitch: 0,  duration: 0.5 }
+  - { pitch: 2,  duration: 0.5 }
+  - { pitch: 2,  duration: 0.5 }
+  - { pitch: 0,  duration: 0.5 }
+  - { pitch: -3,  duration: 0.5 }
+  - { pitch: -5, duration: 0.5 }`,
+
+  'melodies/verse_line_4.yaml': `instrument: saxophone
+notes:
+  - { pitch: 0,  duration: 0.5 }
+  - { pitch: 4,  duration: 0.5 }
+  - { pitch: 7,  duration: 1.0 }
+  - { pitch: 4,  duration: 0.5 }
+  - { pitch: 2,  duration: 0.5 }
+  - { pitch: 0,  duration: 1.0 }
+  - { pitch: -1,  duration: 0.5 }
+  - { pitch: 0,  duration: 0.5 }
+  - { pitch: 2,  duration: 2.0 }
+  - { pitch: rest, duration: 2.4 }`,
+
+  'melodies/chorus_line.yaml': `instrument: clock_chime
+notes:
+  - { pitch: 7,  duration: 0.5 }
+  - { pitch: 7,  duration: 0.5 }
+  - { pitch: 12, duration: 1.0 }
+  - { pitch: 7,  duration: 0.5 }
+  - { pitch: 7,  duration: 0.5 }
+  - { pitch: 9,  duration: 1.0 }
+  - { pitch: 9,  duration: 1.0 }
+  - { pitch: 7,  duration: 2.0 }
+  - { pitch: rest, duration: 3.0 }`,
+
+  'melodies/chorus_ending_1.yaml': `instrument: saxophone
+notes:
+  - { pitch: -5, duration: 0.5 }
+  - { pitch: -5,  duration: 0.5 }
+  - { pitch: 0, duration: 0.5 }
+  - { pitch: rest, duration: 1 }
+  - { pitch: 2,  duration: 0.5 }
+  - { pitch: rest, duration: 1 }
+  - { pitch: 4,  duration: 0.5 }
+  - { pitch: 4,  duration: 0.5 }
+  - { pitch: 4,  duration: 0.5 }
+  - { pitch: 5,  duration: 0.5 }
+  - { pitch: 4,  duration: 0.5 }
+  - { pitch: -3, duration: 0.5 }`,
+
+  'melodies/chorus_ending_2.yaml': `instrument: saxophone
+notes:
+  - { pitch: -3,  duration: 0.5 }
+  - { pitch: 2,  duration: 0.5 }
+  - { pitch: 0,  duration: 1.0 }
+  - { pitch: -1, duration: 1.0 }
+  - { pitch: 0,  duration: 3.0 }`,
+
+  'melodies/ticks.yaml': `instrument: clock_tick
+type: melody
+loop: true
+notes:
+  - { pitch: 19, duration: 1.0 }
+  - { pitch: 12, duration: 1.0 }`,
+
+  'melodies/arpeggio_verse_1.yaml': `instrument: strings
+notes:
+  - { pitch: -12, duration: 0.5 }
+  - { pitch: -8,  duration: 0.5 }
+  - { pitch: -5,  duration: 0.5 }
+  - { pitch: -8,  duration: 0.5 }
+  - { pitch: -17, duration: 0.5 }
+  - { pitch: -13, duration: 0.5 }
+  - { pitch: -10, duration: 0.5 }
+  - { pitch: -13, duration: 0.5 }
+  - { pitch: -12, duration: 0.5 }
+  - { pitch: -8,  duration: 0.5 }
+  - { pitch: -5,  duration: 0.5 }
+  - { pitch: -8,  duration: 0.5 }
+  - { pitch: -19, duration: 0.5 }
+  - { pitch: -15, duration: 0.5 }
+  - { pitch: -12, duration: 0.5 }
+  - { pitch: -15, duration: 0.5 }`,
+
+  'melodies/arpeggio_verse_2.yaml': `instrument: strings
+notes:
+  - { pitch: -19, duration: 0.5 }
+  - { pitch: -15, duration: 0.5 }
+  - { pitch: -12, duration: 0.5 }
+  - { pitch: -8,  duration: 0.5 }
+  - { pitch: -5,  duration: 0.6 }
+  - { pitch: -8,  duration: 0.6 }
+  - { pitch: -17, duration: 0.5 }
+  - { pitch: -13, duration: 0.5 }
+  - { pitch: -10, duration: 0.5 }
+  - { pitch: -13, duration: 0.5 }
+  - { pitch: -12, duration: 0.5 }
+  - { pitch: -8,  duration: 0.5 }
+  - { pitch: -5,  duration: 1.0 }
+  - { pitch: -8,  duration: 1.0 }
+  - { pitch: rest, duration: 1.2 }`,
+
+  'melodies/arpeggio_verse_3.yaml': `instrument: strings
+notes:
+  - { pitch: -12, duration: 1.0 }
+  - { pitch: -8,  duration: 1.0 }
+  - { pitch: -5,  duration: 1.0 }
+  - { pitch: -8,  duration: 1.0 }
+  - { pitch: -17, duration: 0.5 }
+  - { pitch: -13, duration: 0.5 }
+  - { pitch: -10, duration: 0.5 }
+  - { pitch: -13, duration: 0.5 }
+  - { pitch: -17, duration: 0.5 }
+  - { pitch: -12, duration: 0.5 }
+  - { pitch: -8,  duration: 0.5 }
+  - { pitch: -12, duration: 0.5 }
+  - { pitch: -17, duration: 0.5 }
+  - { pitch: -13, duration: 0.5 }
+  - { pitch: rest, duration: 1.0 }`,
+
+  'melodies/arpeggio_chorus.yaml': `instrument: strings
+notes:
+  - { pitch: -12, duration: 1.0 }
+  - { pitch: -8,  duration: 1.0 }
+  - { pitch: -5,  duration: 1.0 }
+  - { pitch: -19, duration: 1.0 }
+  - { pitch: -15, duration: 1.0 }
+  - { pitch: -12, duration: 1.0 }
+  - { pitch: -8,  duration: 1.0 }
+  - { pitch: rest, duration: 3.0 }`,
+
+  'chords/chord_I.yaml': `instrument: strings
+pitches:
+  - -12
+  - -8
+  - -5`,
+
+  'chords/chord_IV.yaml': `instrument: strings
+pitches:
+  - -19
+  - -15
+  - -12`,
+
+  'chords/chord_V7.yaml': `instrument: strings
+pitches:
+  - -17
+  - -13
+  - -10
+  - -7`,
+
+  'chords/chord_I_final.yaml': `instrument: strings
+pitches:
+  - -12
+  - -8
+  - -5
+  - 0`,
+
+  'tracks/melody_track.yaml': `volume: 0.65
 melodies:
-  - lead`,
-  
-  'tracks/chords.yaml': `volume: 0.5
+  - { name: verse_line_1, offset: 0.0 }
+  - { name: verse_line_2, offset: 8.0 }
+  - { name: verse_line_1, offset: 17.4 }
+  - { name: verse_line_2, offset: 25.4 }
+  - { name: verse_line_3, offset: 34.8 }
+  - { name: verse_line_4, offset: 42.8 }
+  - { name: chorus_ending_1, offset: 54.2 }
+  - { name: chorus_ending_2, offset: 62.2 }
+  - { name: chorus_line, offset: 70.2 }
+  - { name: chorus_line, offset: 80.2 }
+  - { name: chorus_ending_1, offset: 90.2 }
+  - { name: chorus_ending_2, offset: 98.2 }
+  - { name: chorus_ending_1, offset: 106.5 }
+  - { name: chorus_ending_2, offset: 113.5 }`,
+
+  'tracks/chords_track.yaml': `volume: 0.3
+melodies:
+  - { name: arpeggio_verse_1, offset: 0.0 }
+  - { name: arpeggio_verse_2, offset: 8.0 }
+  - { name: arpeggio_verse_1, offset: 17.4 }
+  - { name: arpeggio_verse_2, offset: 25.4 }
+  - { name: arpeggio_verse_3, offset: 34.8 }
+  - { name: arpeggio_verse_2, offset: 42.8 }
+  - { name: arpeggio_chorus, offset: 70.2 }
+  - { name: arpeggio_chorus, offset: 80.2 }
 chords:
-  - { name: chord_I, offset: 0, duration: 3.0 }
-  - { name: chord_V, offset: 3, duration: 3.0 }
-  - { name: chord_vi, offset: 6, duration: 3.0 }
-  - { name: chord_IV, offset: 9, duration: 3.0 }`,
-  
-  'tracks/bass.yaml': `volume: 0.6
+  - { name: chord_I, offset: 54.2, duration: 3.0 }
+  - { name: chord_V7, offset: 57.2, duration: 3.0 }
+  - { name: chord_I, offset: 60.2, duration: 2.0 }
+  - { name: chord_IV, offset: 62.2, duration: 2.0 }
+  - { name: chord_V7, offset: 64.2, duration: 2.0 }
+  - { name: chord_I_final, offset: 66.2, duration: 4.0 }
+  - { name: chord_I, offset: 90.2, duration: 3.0 }
+  - { name: chord_V7, offset: 93.2, duration: 3.0 }
+  - { name: chord_I, offset: 96.2, duration: 2.0 }
+  - { name: chord_IV, offset: 98.2, duration: 2.0 }
+  - { name: chord_V7, offset: 100.2, duration: 2.0 }
+  - { name: chord_I_final, offset: 102.2, duration: 4.3 }
+  - { name: chord_I, offset: 106.5, duration: 3.0 }
+  - { name: chord_V7, offset: 109.5, duration: 3.0 }
+  - { name: chord_I, offset: 112.5, duration: 1.0 }
+  - { name: chord_IV, offset: 113.5, duration: 2.0 }
+  - { name: chord_V7, offset: 115.5, duration: 2.0 }
+  - { name: chord_I_final, offset: 117.5, duration: 4.2 }`,
+
+  'tracks/ticks_track.yaml': `volume: 0.1
 melodies:
-  - bass_line`
+  - ticks`
 };
 
 export class Toolbar extends HTMLElement {
@@ -121,6 +343,20 @@ export class Toolbar extends HTMLElement {
     // Transport buttons
     playBtn.addEventListener('click', () => audioEngine.play());
     stopBtn.addEventListener('click', () => audioEngine.stop());
+
+    // Listen to rendering states to show visual loading feedback
+    audioEngine.addEventListener('rendering', (e: any) => {
+      const isRendering = e.detail.rendering;
+      if (isRendering) {
+        playBtn.classList.add('rendering');
+        playBtn.innerHTML = `⏳ Loading...`;
+        playBtn.setAttribute('disabled', 'true');
+      } else {
+        playBtn.classList.remove('rendering');
+        playBtn.innerHTML = `▶ Run`;
+        playBtn.removeAttribute('disabled');
+      }
+    });
 
     // File IO buttons
     openBtn.addEventListener('click', async () => {

@@ -1,0 +1,8 @@
+instrument: saxophone
+notes:
+  # "when the old man died"
+  - { pitch: -3,  duration: 0.5 }   # E4 (when)
+  - { pitch: 2,  duration: 0.5 }   # A4 (the)
+  - { pitch: 0,  duration: 1.0 }   # G4 (old)
+  - { pitch: -1, duration: 1.0 }   # F#4 (man)
+  - { pitch: 0,  duration: 3.0 }   # G4 (died)

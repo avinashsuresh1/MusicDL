@@ -89,17 +89,20 @@ adsr:
       <p>Melodies and Chords contain the note data, and Tracks mix and sequence them on the timeline.</p>
       
       <h3>Melody Schema</h3>
-      <p>Melodies define a sequence of notes. Each file in <code>melodies/</code> contains sequential note data (usually relative to start beat <code>0</code>):</p>
+      <p>Melodies define a sequence of notes. Notes play sequentially (one after another); <strong>offsets are not used in melodies</strong>. You can also configure a melody to loop continuously to fill the composition duration:</p>
       <div class="code-block"># melodies/theme.yaml
 instrument: sine_pad  # References an instrument name in instruments/
+loop: true            # Optional: Enable loop
+loop_start: 1.0       # Optional: Start beat of loop (notes before play once as intro)
+loop_end: 3.0         # Optional: End beat of loop (defaults to melody duration)
 notes:
-  - { pitch: 0,  offset: 0.0, duration: 1.5 } # Root note
-  - { pitch: 4,  offset: 1.5, duration: 0.5 } # Next note
-  - { pitch: rest, offset: 2.0, duration: 1.0 } # Silence / Rest</div>
+  - { pitch: 0,  duration: 1.0 }  # Plays sequentially starting at beat 0
+  - { pitch: 4,  duration: 1.0 }  # Plays sequentially starting at beat 1
+  - { pitch: rest, duration: 1.0 } # Rest / Silence</div>
       <ul>
         <li><code>pitch</code>: Integer interval from root frequency, or the string <code>'rest'</code>.</li>
-        <li><code>offset</code>: Relative starting beat position (float >= 0).</li>
         <li><code>duration</code>: Note duration in beats (float > 0).</li>
+        <li><code>loop</code>, <code>loop_start</code>, <code>loop_end</code>: Configuration to repeat melody sections continuously.</li>
       </ul>
 
       <h3>Chord Schema</h3>

@@ -1,0 +1,6 @@
+instrument: clock_tick
+type: melody
+loop: true
+notes:
+  - { pitch: 19, duration: 1.0 }
+  - { pitch: 12, duration: 1.0 }

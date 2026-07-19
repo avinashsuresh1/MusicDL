@@ -17,8 +17,34 @@ export function getScheduledNotes(composition: Composition): ScheduledNote[] {
     volume: number;
   }
 
+  // 1. Calculate composition total duration from non-looping track elements
+  let totalDurationBeats = 0;
   for (const track of composition.tracks) {
-    // 1. Schedule melodies
+    if (track.melodies) {
+      for (const melodyRef of track.melodies) {
+        let melodyName = typeof melodyRef === 'string' ? melodyRef : melodyRef.name;
+        let melodyOffset = typeof melodyRef === 'string' ? 0 : (melodyRef.offset ?? 0);
+        const melody = composition.melodies[melodyName];
+        if (!melody || melody.loop) {
+          continue;
+        }
+        for (const note of melody.notes) {
+          totalDurationBeats = Math.max(totalDurationBeats, melodyOffset + note.offset + note.duration);
+        }
+      }
+    }
+    if (track.chords) {
+      for (const chordRef of track.chords) {
+        totalDurationBeats = Math.max(totalDurationBeats, chordRef.offset + chordRef.duration);
+      }
+    }
+  }
+  if (totalDurationBeats === 0) {
+    totalDurationBeats = 16; // default fallback if there are only looping elements or empty tracks
+  }
+
+  for (const track of composition.tracks) {
+    // 2. Schedule melodies
     if (track.melodies) {
       for (const melodyRef of track.melodies) {
         let melodyName: string;
@@ -43,23 +69,85 @@ export function getScheduledNotes(composition: Composition): ScheduledNote[] {
           continue;
         }
 
-        for (const note of melody.notes) {
-          if (isRest(note.pitch)) {
-            continue;
+        if (melody.loop) {
+          // Calculate loop start and end beats relative to the melody itself
+          const start = melody.loopStart !== undefined ? melody.loopStart : 0.0;
+          let end = melody.loopEnd;
+          if (end === undefined) {
+            // Find max note end time
+            let maxTime = 0;
+            for (const note of melody.notes) {
+              maxTime = Math.max(maxTime, note.offset + note.duration);
+            }
+            end = maxTime;
           }
+          const loopLength = end - start;
 
-          const absoluteOffset = note.offset + melodyOffset;
-          const startTime = beatsToSeconds(absoluteOffset, composition.tempo);
-          const duration = beatsToSeconds(note.duration, composition.tempo);
-          const frequency = intervalToFrequency(note.pitch, composition.rootFrequency, composition.interval);
+          if (loopLength > 0) {
+            // Divide notes into two categories:
+            // 1. Introductory notes (before start)
+            // 2. Looping notes (within [start, end])
+            const introNotes = melody.notes.filter(n => n.offset < start);
+            const loopNotes = melody.notes.filter(n => n.offset >= start && n.offset < end);
 
-          scheduledNotes.push({
-            frequency,
-            startTime,
-            duration,
-            instrument,
-            volume: track.volume
-          });
+            // Schedule intro notes once
+            for (const note of introNotes) {
+              if (isRest(note.pitch)) continue;
+              const absoluteOffset = note.offset + melodyOffset;
+              const startTime = beatsToSeconds(absoluteOffset, composition.tempo);
+              const duration = beatsToSeconds(note.duration, composition.tempo);
+              const frequency = intervalToFrequency(note.pitch, composition.rootFrequency, composition.interval);
+              scheduledNotes.push({
+                frequency,
+                startTime,
+                duration,
+                instrument,
+                volume: track.volume
+              });
+            }
+
+            // Loop notes until totalDurationBeats is reached
+            let currentLoopStartBeats = start;
+            while (currentLoopStartBeats + melodyOffset < totalDurationBeats) {
+              for (const note of loopNotes) {
+                if (isRest(note.pitch)) continue;
+                // Calculate note offset relative to current loop iteration start
+                const relativeOffset = note.offset - start;
+                const absoluteOffset = melodyOffset + currentLoopStartBeats + relativeOffset;
+                const startTime = beatsToSeconds(absoluteOffset, composition.tempo);
+                const duration = beatsToSeconds(note.duration, composition.tempo);
+                const frequency = intervalToFrequency(note.pitch, composition.rootFrequency, composition.interval);
+                scheduledNotes.push({
+                  frequency,
+                  startTime,
+                  duration,
+                  instrument,
+                  volume: track.volume
+                });
+              }
+              currentLoopStartBeats += loopLength;
+            }
+          }
+        } else {
+          // Schedule all notes normally
+          for (const note of melody.notes) {
+            if (isRest(note.pitch)) {
+              continue;
+            }
+
+            const absoluteOffset = note.offset + melodyOffset;
+            const startTime = beatsToSeconds(absoluteOffset, composition.tempo);
+            const duration = beatsToSeconds(note.duration, composition.tempo);
+            const frequency = intervalToFrequency(note.pitch, composition.rootFrequency, composition.interval);
+
+            scheduledNotes.push({
+              frequency,
+              startTime,
+              duration,
+              instrument,
+              volume: track.volume
+            });
+          }
         }
       }
     }

@@ -1,0 +1,16 @@
+instrument: saxophone
+notes:
+  # "It was bought on the morn of the day that he was born" (resolving to low D4)
+  - { pitch: 0,  duration: 0.5 }   # G4 (It)
+  - { pitch: 4,  duration: 0.5 }   # B4 (was)
+  - { pitch: 7,  duration: 1.0 }   # D5 (bought)
+  - { pitch: 4,  duration: 0.5 }   # B4 (on)
+  - { pitch: 2,  duration: 0.5 }   # A4 (the)
+  - { pitch: 0,  duration: 1.0 }   # G4 (morn)
+  - { pitch: -1,  duration: 0.5 }   # F#4 (of)
+  - { pitch: 0,  duration: 0.5 }   # G4 (the)
+  - { pitch: 2,  duration: 0.5 }   # A4 (day)
+  - { pitch: 2,  duration: 0.5 }   # A4 (that)
+  - { pitch: 0,  duration: 0.5 }   # G4 (he)
+  - { pitch: -3,  duration: 0.5 }   # E4 (was)
+  - { pitch: -5, duration: 0.5 }   # D4 (born - lower fifth)

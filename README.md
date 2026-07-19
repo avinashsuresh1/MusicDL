@@ -81,14 +81,20 @@ adsr:
 ```
 
 ### 3. Melodies (`melodies/`)
-Write sequential notes (starting from offset `0`). Notes have a relative pitch step (numbers representing interval steps relative to the root frequency, or `'rest'` for silence), a relative start beat, and a duration:
+Write sequential notes. Notes play sequentially (one after another); **offsets are not used in melodies**. You can also configure a melody to loop continuously to fill the composition duration:
 ```yaml
 instrument: music_box  # References the name of your instrument file
+loop: true            # Optional: Enable loop
+loop_start: 1.0       # Optional: Start beat of loop (notes before play once as intro)
+loop_end: 3.0         # Optional: End beat of loop (defaults to melody duration)
 notes:
-  - { pitch: 7,  offset: 0.0, duration: 1.5 } # First note
-  - { pitch: 9,  offset: 1.5, duration: 0.5 } # Next note follows
-  - { pitch: rest, offset: 2.0, duration: 1.0 } # Silence / Rest
+  - { pitch: 7,  duration: 1.5 } # Plays starting at beat 0
+  - { pitch: 9,  duration: 0.5 } # Plays starting at beat 1.5
+  - { pitch: rest, duration: 1.0 } # Rest / Silence
 ```
+*   `pitch`: Integer interval from root frequency, or `'rest'` for silence.
+*   `duration`: Note duration in beats (float > 0).
+*   `loop`, `loop_start`, `loop_end`: Configuration to repeat melody sections continuously.
 
 ### 4. Chords (`chords/`)
 Chords define a set of pitches played simultaneously. Because they are played together, **chords do not need offsets or durations** inside their definition files:
@@ -114,9 +120,10 @@ chords:
 ---
 
 ## 🎼 Included Samples
-We've prepared three ready-to-play sample projects for you to explore:
+We've prepared four ready-to-play sample projects for you to explore:
 * **`simple-melody`**: A basic scale sequence.
 * **`chord-progression`**: Warm, ambient chord layers with a bass synth.
+* **`grandfather-clock`**: A multi-instrument masterpiece utilizing relative chord sequencing and automated looping clock ticks.
 * **`silent-night`**: The complete traditional song demonstrating clean, DRY design with reusable melody phrases and sequenced chord track definitions.
 
 ---

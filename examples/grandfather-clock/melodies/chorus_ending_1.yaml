@@ -1,0 +1,15 @@
+instrument: saxophone
+notes:
+  # "But it stopped short, never to go again"
+  - { pitch: -5, duration: 0.5 }   # D4 (But)
+  - { pitch: -5,  duration: 0.5 }   # D4 (it)
+  - { pitch: 0, duration: 0.5 }   # G4 (stopped)
+  - { pitch: rest, duration: 1 }   # rest
+  - { pitch: 2,  duration: 0.5 }   # A4 (short)
+  - { pitch: rest, duration: 1 }   # rest
+  - { pitch: 4,  duration: 0.5 }   # B4 (ne-)
+  - { pitch: 4,  duration: 0.5 }   # B4 (-ver)
+  - { pitch: 4,  duration: 0.5 }   # B4 (to)
+  - { pitch: 5,  duration: 0.5 }   # C5 (go)
+  - { pitch: 4,  duration: 0.5 }   # B4 (a-)
+  - { pitch: -3, duration: 0.5 }   # E4 (gain)

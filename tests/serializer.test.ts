@@ -85,4 +85,29 @@ describe('serializer', () => {
     expect(parsedComp.melodies['lead']).toEqual(originalComp.melodies['lead']);
     expect(parsedComp.tracks).toEqual(originalComp.tracks);
   });
+
+  it('should serialize strictly sequential melodies without the offset key', () => {
+    const sequentialComp: Composition = {
+      ...originalComp,
+      melodies: {
+        lead: {
+          name: "lead",
+          instrument: "flute",
+          notes: [
+            { pitch: 0, offset: 0, duration: 1.0 },
+            { pitch: 4, offset: 1.0, duration: 1.5 },
+            { pitch: 7, offset: 2.5, duration: 2.0 }
+          ]
+        }
+      }
+    };
+    const files = serializeProject(sequentialComp);
+    const melodyYaml = files['melodies/lead.yaml'];
+
+    // Verify it does NOT contain 'offset:' keys
+    expect(melodyYaml).toContain('- { pitch: 0, duration: 1 }');
+    expect(melodyYaml).toContain('- { pitch: 4, duration: 1.5 }');
+    expect(melodyYaml).toContain('- { pitch: 7, duration: 2 }');
+    expect(melodyYaml).not.toContain('offset:');
+  });
 });

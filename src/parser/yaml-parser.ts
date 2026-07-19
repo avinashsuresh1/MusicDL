@@ -115,7 +115,7 @@ export function parseMelody(yamlContent: string, name: string): Melody {
     throw new Error(`Melody '${name}' is empty or invalid`);
   }
 
-  validateObjectKeys(data, new Set(['type', 'instrument', 'notes']), `Melody '${name}'`);
+  validateObjectKeys(data, new Set(['type', 'instrument', 'notes', 'loop', 'loop_start', 'loop_end']), `Melody '${name}'`);
 
   if (typeof data.instrument !== 'string' || !data.instrument.trim()) {
     throw new Error(`Melody '${name}': 'instrument' must be a non-empty string`);
@@ -125,6 +125,7 @@ export function parseMelody(yamlContent: string, name: string): Melody {
     throw new Error(`Melody '${name}': 'notes' must be a list`);
   }
 
+  let currentOffset = 0;
   const notes: Note[] = data.notes.map((n: any, idx: number) => {
     validateObjectKeys(n, new Set(['pitch', 'offset', 'duration']), `Melody '${name}': note[${idx}]`);
     let pitch: number | 'rest';
@@ -136,25 +137,40 @@ export function parseMelody(yamlContent: string, name: string): Melody {
       throw new Error(`Melody '${name}': note[${idx}] 'pitch' must be an integer or 'rest'`);
     }
 
-    if (typeof n.offset !== 'number' || isNaN(n.offset) || n.offset < 0) {
-      throw new Error(`Melody '${name}': note[${idx}] 'offset' must be a non-negative number`);
+    let offset = n.offset;
+    if (offset !== undefined) {
+      if (typeof offset !== 'number' || isNaN(offset) || offset < 0) {
+        throw new Error(`Melody '${name}': note[${idx}] 'offset' must be a non-negative number`);
+      }
+      currentOffset = offset;
+    } else {
+      offset = currentOffset;
     }
 
     if (typeof n.duration !== 'number' || isNaN(n.duration) || n.duration <= 0) {
       throw new Error(`Melody '${name}': note[${idx}] 'duration' must be a positive number`);
     }
 
+    currentOffset = offset + n.duration;
+
     return {
       pitch,
-      offset: n.offset,
+      offset,
       duration: n.duration
     };
   });
 
+  const loop = data.loop !== undefined ? Boolean(data.loop) : undefined;
+  const loopStart = typeof data.loop_start === 'number' ? data.loop_start : undefined;
+  const loopEnd = typeof data.loop_end === 'number' ? data.loop_end : undefined;
+
   return {
     name,
     instrument: data.instrument,
-    notes
+    notes,
+    ...(loop !== undefined && { loop }),
+    ...(loopStart !== undefined && { loopStart }),
+    ...(loopEnd !== undefined && { loopEnd })
   };
 }
 

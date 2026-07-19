@@ -39,18 +39,38 @@ export function serializeInstrument(instrument: Instrument): string {
  * Convert a single melody into YAML with flow-style notes.
  */
 export function serializeMelody(melody: Melody): string {
-  const header = {
+  const header: any = {
     instrument: melody.instrument
   };
+  if (melody.loop !== undefined) header.loop = melody.loop;
+  if (melody.loopStart !== undefined) header.loop_start = melody.loopStart;
+  if (melody.loopEnd !== undefined) header.loop_end = melody.loopEnd;
+  
   let output = yaml.dump(header, { indent: 2 });
   
   if (melody.notes.length === 0) {
     output += 'notes: []\n';
   } else {
     output += 'notes:\n';
+    
+    // Check if the notes are strictly sequential (i.e. start at 0 and have no gaps or overlaps)
+    let isSequential = true;
+    let expectedOffset = 0;
+    for (const note of melody.notes) {
+      if (note.offset === undefined || Math.abs(note.offset - expectedOffset) > 0.0001) {
+        isSequential = false;
+        break;
+      }
+      expectedOffset += note.duration;
+    }
+
     for (const note of melody.notes) {
       const pitchVal = note.pitch === 'rest' ? 'rest' : note.pitch;
-      output += `  - { pitch: ${pitchVal}, offset: ${note.offset}, duration: ${note.duration} }\n`;
+      if (isSequential) {
+        output += `  - { pitch: ${pitchVal}, duration: ${note.duration} }\n`;
+      } else {
+        output += `  - { pitch: ${pitchVal}, offset: ${note.offset}, duration: ${note.duration} }\n`;
+      }
     }
   }
   return output;

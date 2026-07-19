@@ -1,0 +1,21 @@
+instrument: strings
+notes:
+  # G Major (4.0 beats)
+  - { pitch: -12, duration: 1.0 }
+  - { pitch: -8,  duration: 1.0 }
+  - { pitch: -5,  duration: 1.0 }
+  - { pitch: -8,  duration: 1.0 }
+  # D Major (2.0 beats)
+  - { pitch: -17, duration: 0.5 }
+  - { pitch: -13, duration: 0.5 }
+  - { pitch: -10, duration: 0.5 }
+  - { pitch: -13, duration: 0.5 }
+  # A minor (2.0 beats)
+  - { pitch: -17, duration: 0.5 }
+  - { pitch: -12, duration: 0.5 }
+  - { pitch: -8,  duration: 0.5 }
+  - { pitch: -12, duration: 0.5 }
+  # D Major (2.0 beats)
+  - { pitch: -17, duration: 0.5 }
+  - { pitch: -13, duration: 0.5 }
+  - { pitch: rest, duration: 1.0 }
