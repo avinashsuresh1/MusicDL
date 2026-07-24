@@ -17,30 +17,61 @@ export class Visualizer extends HTMLElement {
   }
 
   private setupListeners() {
-    store.addEventListener('project-loaded', () => this.refresh());
-    store.addEventListener('composition-changed', () => this.refresh());
+    let playheadEl: HTMLElement | null = null;
+    let cachedBlocks: { el: HTMLElement; offset: number; end: number; active: boolean }[] = [];
+
+    const cacheNoteBlocks = () => {
+      playheadEl = this.shadowRoot!.querySelector('.playhead');
+      const elements = this.shadowRoot!.querySelectorAll('.note-block');
+      cachedBlocks = Array.from(elements).map(el => {
+        const offset = parseFloat(el.getAttribute('data-offset') || '0');
+        const duration = parseFloat(el.getAttribute('data-duration') || '0');
+        return {
+          el: el as HTMLElement,
+          offset,
+          end: offset + duration,
+          active: false
+        };
+      });
+    };
+
+    store.addEventListener('project-loaded', () => {
+      this.refresh();
+      cacheNoteBlocks();
+    });
+
+    store.addEventListener('composition-changed', () => {
+      this.refresh();
+      cacheNoteBlocks();
+    });
     
-    // Playhead and note highlighting
+    let lastBeatStep = -1;
     store.addEventListener('cursor-changed', (e: any) => {
       const beat = e.detail.beat;
       
-      const playhead = this.shadowRoot!.querySelector('.playhead') as HTMLElement;
-      if (playhead) {
-        playhead.style.left = `${beat * this.zoomX + 120}px`; // align with grid (120px is header width)
+      if (!playheadEl) {
+        playheadEl = this.shadowRoot!.querySelector('.playhead');
+      }
+      if (playheadEl) {
+        playheadEl.style.transform = `translateX(${beat * this.zoomX}px)`;
       }
 
-      const noteBlocks = this.shadowRoot!.querySelectorAll('.note-block');
-      noteBlocks.forEach(block => {
-        const offset = parseFloat(block.getAttribute('data-offset')!);
-        const duration = parseFloat(block.getAttribute('data-duration')!);
-        const isActive = beat >= offset && beat < offset + duration;
-        
-        if (isActive) {
-          block.classList.add('active');
-        } else {
-          block.classList.remove('active');
+      const currentBeatStep = Math.floor(beat * 10);
+      if (currentBeatStep !== lastBeatStep) {
+        lastBeatStep = currentBeatStep;
+        for (let i = 0; i < cachedBlocks.length; i++) {
+          const item = cachedBlocks[i];
+          const isActive = beat >= item.offset && beat < item.end;
+          if (item.active !== isActive) {
+            item.active = isActive;
+            if (isActive) {
+              item.el.classList.add('active');
+            } else {
+              item.el.classList.remove('active');
+            }
+          }
         }
-      });
+      }
     });
   }
 

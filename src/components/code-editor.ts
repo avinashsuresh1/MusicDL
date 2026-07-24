@@ -51,11 +51,14 @@ export class CodeEditor extends HTMLElement {
     this.refreshHeader();
     this.refreshTextarea();
 
-    const textarea = this.shadowRoot!.querySelector('.editor-textarea') as HTMLTextAreaElement;
+    let debounceTimer: any = null;
     if (textarea) {
-      // 1. Support real-time typing / reparsing
+      // 1. Support debounced typing / reparsing (200ms)
       textarea.addEventListener('input', () => {
-        store.updateFile(store.getActiveFilePath(), textarea.value);
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          store.updateFile(store.getActiveFilePath(), textarea.value);
+        }, 200);
       });
 
       // 2. Custom tab key handling (inserts 2 spaces)

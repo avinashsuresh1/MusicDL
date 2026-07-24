@@ -144,7 +144,6 @@ export class ProjectStore extends EventTarget {
         this.dispatchEvent(new CustomEvent('validation-failed'));
       } else {
         this.errors = [];
-        audioEngine.setComposition(comp);
         this.dispatchEvent(new CustomEvent('composition-changed'));
       }
     } catch (err: any) {
@@ -241,6 +240,9 @@ export class ProjectStore extends EventTarget {
     delete this.files[oldPath];
     this.files[newPath] = content;
 
+    // Automatically update references in tracks/melodies
+    this.updateCrossReferences(oldPath, newPath);
+
     if (this.activeFilePath === oldPath) {
       this.activeFilePath = newPath;
     }
@@ -253,6 +255,40 @@ export class ProjectStore extends EventTarget {
 
     this.reparseProject();
     this.dispatchEvent(new CustomEvent('project-loaded'));
+  }
+
+  private updateCrossReferences(oldPath: string, newPath: string) {
+    const oldParts = oldPath.split('/');
+    const newParts = newPath.split('/');
+    if (oldParts.length !== 2 || newParts.length !== 2) return;
+
+    const folder = oldParts[0];
+    const oldName = oldParts[1].replace(/\.ya?ml$/i, '');
+    const newName = newParts[1].replace(/\.ya?ml$/i, '');
+
+    if (oldName === newName) return;
+
+    if (folder === 'melodies' || folder === 'chords') {
+      for (const filePath of Object.keys(this.files)) {
+        if (filePath.startsWith('tracks/')) {
+          let content = this.files[filePath];
+          const regex1 = new RegExp(`(\\bname:\\s*)['"]?${oldName}['"]?(\\b|$)`, 'g');
+          const regex2 = new RegExp(`(\\n\\s*-\\s*)['"]?${oldName}['"]?(\\b|$)`, 'g');
+          content = content.replace(regex1, `$1${newName}`);
+          content = content.replace(regex2, `$1${newName}`);
+          this.files[filePath] = content;
+        }
+      }
+    } else if (folder === 'instruments') {
+      for (const filePath of Object.keys(this.files)) {
+        if (filePath.startsWith('melodies/') || filePath.startsWith('chords/')) {
+          let content = this.files[filePath];
+          const regex = new RegExp(`(\\binstrument:\\s*)['"]?${oldName}['"]?(\\b|$)`, 'g');
+          content = content.replace(regex, `$1${newName}`);
+          this.files[filePath] = content;
+        }
+      }
+    }
   }
 
   async deleteFile(path: string) {

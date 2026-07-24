@@ -341,7 +341,7 @@ export class Toolbar extends HTMLElement {
     });
 
     // Transport buttons
-    playBtn.addEventListener('click', () => audioEngine.play());
+    playBtn.addEventListener('click', () => audioEngine.play(store.getComposition() ?? undefined));
     stopBtn.addEventListener('click', () => audioEngine.stop());
 
     // Listen to rendering states to show visual loading feedback
@@ -365,7 +365,15 @@ export class Toolbar extends HTMLElement {
         store.loadProject(files);
       } catch (err: any) {
         if (err.name !== 'AbortError') {
-          alert('Error loading project: ' + err.message);
+          this.dispatchEvent(new CustomEvent('show-dialog', {
+            bubbles: true,
+            composed: true,
+            detail: {
+              title: 'Load Failed',
+              message: 'Error loading project: ' + err.message,
+              hideCancel: true
+            }
+          }));
         }
       }
     });
@@ -378,9 +386,25 @@ export class Toolbar extends HTMLElement {
       try {
         const files = store.getFiles();
         await saveProjectDirectory(files);
-        alert('Project saved successfully!');
+        this.dispatchEvent(new CustomEvent('show-dialog', {
+          bubbles: true,
+          composed: true,
+          detail: {
+            title: 'Project Saved',
+            message: 'Project saved successfully to disk!',
+            hideCancel: true
+          }
+        }));
       } catch (err: any) {
-        alert('Error saving project: ' + err.message);
+        this.dispatchEvent(new CustomEvent('show-dialog', {
+          bubbles: true,
+          composed: true,
+          detail: {
+            title: 'Save Failed',
+            message: 'Error saving project: ' + err.message,
+            hideCancel: true
+          }
+        }));
       }
     });
 

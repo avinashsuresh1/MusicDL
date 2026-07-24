@@ -67,10 +67,19 @@ export class AudioEngine extends EventTarget {
 
   // ---------- Public transport controls ----------
 
-  async play() {
-    if (!this.composition) return;
+  async play(comp?: Composition) {
+    const targetComp = comp || this.composition;
+    if (!targetComp) return;
     this.initAudio();
     if (this.state === 'playing') return;
+
+    // Check if composition changed or needs scheduling
+    if (this.composition !== targetComp || !this.renderedSamples) {
+      this.composition = targetComp;
+      this.scheduledNotes = getScheduledNotes(targetComp);
+      this.renderedSamples = null;
+      this.renderedBuffer = null;
+    }
 
     // Pre-render if needed
     if (!this.renderedSamples) {

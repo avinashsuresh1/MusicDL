@@ -79,4 +79,16 @@ melodies: []
     expect(store.getFiles()['instruments/piano.yaml']).toContain('harmonics:');
     expect(store.getComposition()?.instruments['piano']).toBeDefined();
   });
+
+  it('should automatically update track references when a melody is renamed', async () => {
+    expect(store.getFiles()['melodies/lead.yaml']).toBeDefined();
+
+    // Rename file without manually updating track file
+    await store.renameFile('melodies/lead.yaml', 'melodies/theme.yaml');
+
+    // Check that track file content was automatically updated
+    expect(store.getFiles()['tracks/melody_track.yaml']).toContain('theme');
+    expect(store.getErrors()).toHaveLength(0);
+    expect(store.getComposition()?.melodies['theme']).toBeDefined();
+  });
 });

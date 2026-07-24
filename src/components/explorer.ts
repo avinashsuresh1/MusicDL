@@ -152,11 +152,29 @@ export class Explorer extends HTMLElement {
         const oldNameWithExt = parts[1];
         const oldName = oldNameWithExt.replace(/\.ya?ml$/i, '');
 
-        const newName = prompt(`Rename ${oldName} to:`, oldName);
-        if (newName && newName.trim() && newName.trim() !== oldName) {
-          const newPath = `${dir}/${newName.trim()}.yaml`;
-          store.renameFile(path, newPath).catch(err => alert(err.message));
-        }
+        this.dispatchEvent(new CustomEvent('show-dialog', {
+          bubbles: true,
+          composed: true,
+          detail: {
+            title: `Rename File`,
+            message: `Enter new name for '${oldName}':`,
+            showInput: true,
+            defaultValue: oldName,
+            confirmText: 'Rename',
+            callback: (newName: string | null) => {
+              if (newName && newName.trim() && newName.trim() !== oldName) {
+                const newPath = `${dir}/${newName.trim()}.yaml`;
+                store.renameFile(path, newPath).catch(err => {
+                  this.dispatchEvent(new CustomEvent('show-dialog', {
+                    bubbles: true,
+                    composed: true,
+                    detail: { title: 'Error', message: err.message, hideCancel: true }
+                  }));
+                });
+              }
+            }
+          }
+        }));
       });
     });
 
@@ -168,9 +186,27 @@ export class Explorer extends HTMLElement {
         const path = btn.getAttribute('data-path')!;
         const fileName = path.split('/')[1];
 
-        if (confirm(`Are you sure you want to delete ${fileName}?`)) {
-          store.deleteFile(path).catch(err => alert(err.message));
-        }
+        this.dispatchEvent(new CustomEvent('show-dialog', {
+          bubbles: true,
+          composed: true,
+          detail: {
+            title: `Delete File`,
+            message: `Are you sure you want to delete '${fileName}'?`,
+            showInput: false,
+            confirmText: 'Delete',
+            callback: (res: string | null) => {
+              if (res !== null) {
+                store.deleteFile(path).catch(err => {
+                  this.dispatchEvent(new CustomEvent('show-dialog', {
+                    bubbles: true,
+                    composed: true,
+                    detail: { title: 'Error', message: err.message, hideCancel: true }
+                  }));
+                });
+              }
+            }
+          }
+        }));
       });
     });
 
@@ -182,10 +218,27 @@ export class Explorer extends HTMLElement {
         const folder = btn.getAttribute('data-folder')!;
         const singular = folder.slice(0, -1);
 
-        const name = prompt(`Enter new ${singular} name:`);
-        if (name && name.trim()) {
-          store.addFile(folder, name.trim()).catch(err => alert(err.message));
-        }
+        this.dispatchEvent(new CustomEvent('show-dialog', {
+          bubbles: true,
+          composed: true,
+          detail: {
+            title: `New ${singular}`,
+            message: `Enter name for new ${singular}:`,
+            showInput: true,
+            confirmText: 'Create',
+            callback: (name: string | null) => {
+              if (name && name.trim()) {
+                store.addFile(folder, name.trim()).catch(err => {
+                  this.dispatchEvent(new CustomEvent('show-dialog', {
+                    bubbles: true,
+                    composed: true,
+                    detail: { title: 'Error', message: err.message, hideCancel: true }
+                  }));
+                });
+              }
+            }
+          }
+        }));
       });
     });
   }

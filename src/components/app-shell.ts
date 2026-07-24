@@ -34,6 +34,56 @@ export class AppShell extends HTMLElement {
       }
     });
 
+    // Custom non-blocking dialog modal handlers
+    const dialogModal = this.shadowRoot!.querySelector('#dialog-modal') as HTMLElement;
+    const dialogTitle = this.shadowRoot!.querySelector('#dialog-title') as HTMLElement;
+    const dialogMessage = this.shadowRoot!.querySelector('#dialog-message') as HTMLElement;
+    const dialogInput = this.shadowRoot!.querySelector('#dialog-input') as HTMLInputElement;
+    const dialogCancel = this.shadowRoot!.querySelector('#dialog-cancel') as HTMLElement;
+    const dialogConfirm = this.shadowRoot!.querySelector('#dialog-confirm') as HTMLElement;
+
+    let activeCallback: ((val: string | null) => void) | null = null;
+
+    const closeDialog = (res: string | null) => {
+      dialogModal.classList.remove('visible');
+      if (activeCallback) {
+        activeCallback(res);
+        activeCallback = null;
+      }
+    };
+
+    dialogCancel.addEventListener('click', () => closeDialog(null));
+    dialogConfirm.addEventListener('click', () => closeDialog(dialogInput.value));
+    
+    dialogInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') closeDialog(dialogInput.value);
+      if (e.key === 'Escape') closeDialog(null);
+    });
+
+    this.addEventListener('show-dialog', (e: any) => {
+      const opts = e.detail;
+      dialogTitle.textContent = opts.title || 'Notification';
+      dialogMessage.textContent = opts.message || '';
+      
+      if (opts.showInput) {
+        dialogInput.style.display = 'block';
+        dialogInput.value = opts.defaultValue || '';
+        setTimeout(() => {
+          dialogInput.focus();
+          dialogInput.select();
+        }, 50);
+      } else {
+        dialogInput.style.display = 'none';
+      }
+
+      dialogCancel.style.display = opts.hideCancel ? 'none' : 'inline-block';
+      dialogConfirm.textContent = opts.confirmText || 'OK';
+      dialogCancel.textContent = opts.cancelText || 'Cancel';
+
+      activeCallback = opts.callback || null;
+      dialogModal.classList.add('visible');
+    });
+
     // Tab switching handlers
     const tabButtons = this.shadowRoot!.querySelectorAll('.tab-btn');
     const tabPanes = this.shadowRoot!.querySelectorAll('.tab-pane');

@@ -48,6 +48,28 @@ fn is_safe_path(rel_path: &str) -> bool {
 
 fn save_dir(dir_path: &str, files: HashMap<String, String>) -> std::io::Result<()> {
     let root = Path::new(dir_path);
+
+    // Clean up lingering YAML files in project subfolders that no longer exist in updated files map
+    let subfolders = ["instruments", "melodies", "chords", "tracks"];
+    for folder in subfolders {
+        let folder_path = root.join(folder);
+        if folder_path.exists() && folder_path.is_dir() {
+            if let Ok(entries) = fs::read_dir(&folder_path) {
+                for entry in entries.flatten() {
+                    let path = entry.path();
+                    if path.is_file() && path.extension().map_or(false, |ext| ext == "yaml" || ext == "yml") {
+                        if let Ok(rel) = path.strip_prefix(root) {
+                            let rel_str = rel.to_string_lossy().replace('\\', "/");
+                            if !files.contains_key(&rel_str) {
+                                let _ = fs::remove_file(path);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     for (rel_path, content) in files {
         if !is_safe_path(&rel_path) {
             continue; // Skip unsafe paths for security
