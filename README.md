@@ -67,7 +67,7 @@ interval: 100          # Step size in cents (e.g., 100 cents = 1 semitone in 12-
 ```
 
 ### 2. Instruments (`instruments/`)
-Create custom instruments by combining sound layers (harmonics) and setting how they fade in and out (ADSR volume envelopes):
+MusicDL enables you to create full acoustic and synthetic instruments **using nothing but code**. You define timbres with **additive synthesis** (harmonic partial multipliers $z$ and amplitudes) and **ADSR envelopes**:
 ```yaml
 harmonics:
   - { z: 1, amplitude: 1.0 }   # Fundamental tone
@@ -79,6 +79,12 @@ adsr:
   sustain: 0.6   # Constant volume level while note is held (0.0 to 1.0)
   release: 600   # Ring-out time after note finishes (in milliseconds)
 ```
+
+#### Code-Defined Instrument Presets
+* **Flute** (`flute.yaml`): `harmonics: [{z: 1, amp: 1.0}, {z: 2, amp: 0.12}], adsr: {attack: 35, decay: 50, sustain: 0.9, release: 100}`
+* **Piano** (`piano.yaml`): `harmonics: [{z: 1, amp: 1.0}, {z: 2, amp: 0.5}, {z: 3, amp: 0.25}], adsr: {attack: 5, decay: 300, sustain: 0.2, release: 350}`
+* **Tubular Bell** (`bell.yaml`): `harmonics: [{z: 1.0, amp: 1.0}, {z: 2.76, amp: 0.5}], adsr: {attack: 1, decay: 400, sustain: 0.0, release: 1200}`
+* **String Ensemble** (`strings.yaml`): `harmonics: [{z: 1, amp: 1.0}, {z: 2, amp: 0.7}, {z: 3, amp: 0.45}], adsr: {attack: 150, decay: 200, sustain: 0.85, release: 600}`
 
 ### 3. Melodies (`melodies/`)
 Write sequential notes. Notes play sequentially (one after another); **offsets are not used in melodies**. You can also configure a melody to loop continuously to fill the composition duration:

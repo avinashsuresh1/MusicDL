@@ -1,0 +1,10 @@
+# Plucked Guitar: Sharp transient attack with rapid decay
+harmonics:
+  - { z: 1, amplitude: 1.0 }
+  - { z: 2, amplitude: 0.4 }
+  - { z: 3, amplitude: 0.2 }
+adsr:
+  attack: 2
+  decay: 150
+  sustain: 0.15
+  release: 120

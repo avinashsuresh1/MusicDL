@@ -1,0 +1,10 @@
+# 80s Sub Bass Synth: Heavy low-end fundamental with sub-octave
+harmonics:
+  - { z: 0.5, amplitude: 0.4 }
+  - { z: 1, amplitude: 1.0 }
+  - { z: 2, amplitude: 0.6 }
+adsr:
+  attack: 10
+  decay: 120
+  sustain: 0.7
+  release: 100

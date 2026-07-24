@@ -1,0 +1,12 @@
+# Warm String Ensemble: Slow bowing swell with full sustain
+harmonics:
+  - { z: 1, amplitude: 1.0 }
+  - { z: 2, amplitude: 0.7 }
+  - { z: 3, amplitude: 0.45 }
+  - { z: 4, amplitude: 0.3 }
+  - { z: 5, amplitude: 0.15 }
+adsr:
+  attack: 150
+  decay: 200
+  sustain: 0.85
+  release: 600

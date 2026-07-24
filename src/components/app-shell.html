@@ -82,6 +82,59 @@ adsr:
   decay: 200     # Decay duration in milliseconds (ramp to sustain level)
   sustain: 0.6   # Sustain volume level (float, 0.0 - 1.0)
   release: 600   # Release duration in milliseconds (fade out after release)</div>
+
+      <h3>Code-Defined Instrument Presets</h3>
+      <p>MusicDL empowers you to craft rich instruments purely out of code. Here are several ready-to-use instrument definitions:</p>
+      
+      <h4>1. Acoustic Flute (Pure Fundamental & Breathy Breath)</h4>
+      <div class="code-block"># instruments/flute.yaml
+harmonics:
+  - { z: 1, amplitude: 1.0 }
+  - { z: 2, amplitude: 0.12 }
+  - { z: 3, amplitude: 0.04 }
+adsr: { attack: 35, decay: 50, sustain: 0.9, release: 100 }</div>
+
+      <h4>2. Acoustic Piano (Percussive Attack & Rich Harmonic Decay)</h4>
+      <div class="code-block"># instruments/piano.yaml
+harmonics:
+  - { z: 1, amplitude: 1.0 }
+  - { z: 2, amplitude: 0.5 }
+  - { z: 3, amplitude: 0.25 }
+  - { z: 4, amplitude: 0.12 }
+adsr: { attack: 5, decay: 300, sustain: 0.2, release: 350 }</div>
+
+      <h4>3. Tubular Chime / Bell (Inharmonic Non-Integer Overtones)</h4>
+      <div class="code-block"># instruments/bell.yaml
+harmonics:
+  - { z: 1.0, amplitude: 1.0 }
+  - { z: 2.76, amplitude: 0.5 }
+  - { z: 5.4, amplitude: 0.25 }
+adsr: { attack: 1, decay: 400, sustain: 0.0, release: 1200 }</div>
+
+      <h4>4. Warm String Ensemble (Slow Bowing Swell & Full Sustain)</h4>
+      <div class="code-block"># instruments/strings.yaml
+harmonics:
+  - { z: 1, amplitude: 1.0 }
+  - { z: 2, amplitude: 0.7 }
+  - { z: 3, amplitude: 0.45 }
+  - { z: 4, amplitude: 0.3 }
+adsr: { attack: 150, decay: 200, sustain: 0.85, release: 600 }</div>
+
+      <h4>5. Plucked Guitar (Sharp Transient & Rapid Decay)</h4>
+      <div class="code-block"># instruments/guitar.yaml
+harmonics:
+  - { z: 1, amplitude: 1.0 }
+  - { z: 2, amplitude: 0.4 }
+  - { z: 3, amplitude: 0.2 }
+adsr: { attack: 2, decay: 150, sustain: 0.15, release: 120 }</div>
+
+      <h4>6. 80s Sub Bass Synth (Deep Fundamental & Sub-Octave)</h4>
+      <div class="code-block"># instruments/sub_bass.yaml
+harmonics:
+  - { z: 0.5, amplitude: 0.4 }
+  - { z: 1, amplitude: 1.0 }
+  - { z: 2, amplitude: 0.6 }
+adsr: { attack: 10, decay: 120, sustain: 0.7, release: 100 }</div>
     </div>
 
     <!-- TAB 3: MELODY, CHORD & TRACK -->

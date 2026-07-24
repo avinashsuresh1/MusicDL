@@ -1,0 +1,12 @@
+# Saxophone: Bright buzzy bite rich in all integer harmonics
+harmonics:
+  - { z: 1, amplitude: 1.0 }
+  - { z: 2, amplitude: 0.65 }
+  - { z: 3, amplitude: 0.45 }
+  - { z: 4, amplitude: 0.3 }
+  - { z: 5, amplitude: 0.15 }
+adsr:
+  attack: 25
+  decay: 80
+  sustain: 0.8
+  release: 120

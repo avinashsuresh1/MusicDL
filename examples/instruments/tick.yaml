@@ -1,0 +1,10 @@
+# Percussive Clock Tick: Ultrafast 1ms attack and dry decay
+harmonics:
+  - { z: 1, amplitude: 1.0 }
+  - { z: 2.3, amplitude: 0.4 }
+  - { z: 4.1, amplitude: 0.15 }
+adsr:
+  attack: 1
+  decay: 25
+  sustain: 0.0
+  release: 15
