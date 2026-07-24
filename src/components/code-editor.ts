@@ -51,6 +51,7 @@ export class CodeEditor extends HTMLElement {
     this.refreshHeader();
     this.refreshTextarea();
 
+    const textarea = this.shadowRoot!.querySelector('.editor-textarea') as HTMLTextAreaElement;
     let debounceTimer: any = null;
     if (textarea) {
       // 1. Support debounced typing / reparsing (200ms)
