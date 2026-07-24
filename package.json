@@ -1,6 +1,6 @@
 {
   "name": "musicdl",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A YAML-based music definition language core library",
   "private": true,
   "engines": {
