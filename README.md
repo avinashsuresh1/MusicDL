@@ -82,6 +82,7 @@ adsr:
 
 #### Code-Defined Instrument Presets
 * **Flute** (`flute.yaml`): `harmonics: [{z: 1, amp: 1.0}, {z: 2, amp: 0.12}], adsr: {attack: 35, decay: 50, sustain: 0.9, release: 100}`
+* **Bansuri (Bamboo Flute)** (`bansuri.yaml`): `harmonics: [{z: 1, amp: 1.0}, {z: 2, amp: 0.25}, {z: 0.5, amp: 0.05}], adsr: {attack: 60, decay: 80, sustain: 0.92, release: 250}`
 * **Piano** (`piano.yaml`): `harmonics: [{z: 1, amp: 1.0}, {z: 2, amp: 0.5}, {z: 3, amp: 0.25}], adsr: {attack: 5, decay: 300, sustain: 0.2, release: 350}`
 * **Tubular Bell** (`bell.yaml`): `harmonics: [{z: 1.0, amp: 1.0}, {z: 2.76, amp: 0.5}], adsr: {attack: 1, decay: 400, sustain: 0.0, release: 1200}`
 * **String Ensemble** (`strings.yaml`): `harmonics: [{z: 1, amp: 1.0}, {z: 2, amp: 0.7}, {z: 3, amp: 0.45}], adsr: {attack: 150, decay: 200, sustain: 0.85, release: 600}`

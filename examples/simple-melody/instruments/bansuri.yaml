@@ -1,0 +1,10 @@
+# Bansuri: Traditional Indian Bamboo Flute
+harmonics:
+  - { z: 1, amplitude: 0.2 }        # Core fundamental pitch
+  - { z: 3, amplitude: 0.2 }        # Hollow odd-harmonic bamboo pipe overtone
+  - { z: 0.1, amplitude: 0.0025 }   # Subharmonic low air column depth
+adsr:
+  attack: 800     # Organic breath swell (meend / air entrance)
+  decay: 100
+  sustain: 0.3
+  release: 200   # Natural air dissipation

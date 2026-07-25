@@ -1,4 +1,4 @@
-instrument: sine_pad
+instrument: bansuri
 notes:
   - { pitch: 0, duration: 1 }
   - { pitch: 2, duration: 1 }

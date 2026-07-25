@@ -50,7 +50,7 @@ export function renderToSamples(
   return buffer;
 }
 
-/** Render a single note into the buffer (additive). */
+/** Render a single note into the buffer (additive with smooth S-curve envelope). */
 function renderNote(
   buffer: Float32Array,
   note: ScheduledNote,
@@ -84,17 +84,20 @@ function renderNote(
     // Time relative to note start
     const t = (i - startSample) * invSR;
 
-    // ADSR envelope (linear segments)
+    // Smooth S-curve (raised-cosine) ADSR envelope for silky acoustic transitions
     let env: number;
     if (t < A) {
-      env = A > 0 ? t / A : 1;
+      env = A > 0 ? 0.5 * (1 - Math.cos(Math.PI * (t / A))) : 1;
     } else if (t < A + D) {
-      env = D > 0 ? 1 - ((t - A) / D) * (1 - S) : S;
+      const decayRatio = D > 0 ? (t - A) / D : 1;
+      const smoothDecay = 0.5 * (1 + Math.cos(Math.PI * decayRatio));
+      env = S + (1 - S) * smoothDecay;
     } else if (t < dur) {
       env = S;
     } else {
       const rt = t - dur;
-      env = R > 0 ? S * (1 - rt / R) : 0;
+      const releaseRatio = R > 0 ? Math.min(1, rt / R) : 1;
+      env = S * 0.5 * (1 + Math.cos(Math.PI * releaseRatio));
     }
     if (env < 0) env = 0;
 

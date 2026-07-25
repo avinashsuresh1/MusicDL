@@ -1,0 +1,11 @@
+# Flute: Smooth acoustic woodwind flute
+harmonics:
+  - { z: 1.0, amplitude: 1.0 }    # Core fundamental pitch
+  - { z: 2.0, amplitude: 0.12 }   # Soft woody octave body
+  - { z: 0.5, amplitude: 0.08 }   # Low air column resonance
+  - { z: 3.0, amplitude: 0.04 }   # Soft hollow air overtone
+adsr:
+  attack: 50     # Smooth organic breath swell
+  decay: 40
+  sustain: 0.92
+  release: 200   # Silky natural air decay

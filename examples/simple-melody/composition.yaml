@@ -1,4 +1,4 @@
-title: "Simple C Major Scale"
+title: "Simple Scale Test Bench"
 tempo: 120
-root_frequency: 261.63
+root_frequency: 261.63   # Root note (Hz): 130.81 (C3 Bass), 261.63 (C4 Mid), 523.25 (C5 High)
 interval: 100
