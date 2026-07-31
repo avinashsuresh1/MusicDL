@@ -4,6 +4,9 @@
 
 Think of it like writing code, but the output is a musical composition!
 
+> [!WARNING]
+> **Branch & Release Policy**: Code on the `main` / `master` branch is considered **unstable** and in active development. Official release tags (e.g., [`v1.1.3`](https://github.com/avinashsuresh1/MusicDL/releases/tag/v1.1.3), `v1.1.2`) are created only when changes are finalized, verified, and stable without regressions. Always use tagged releases for stable deployment.
+
 ---
 
 ## 🚀 How to Get Started
@@ -18,7 +21,8 @@ MusicDL can be run in development mode or built into a standalone native desktop
     ```bash
     sudo apt-get install libasound2-dev
     ```
-* **macOS / Apple**: Compile-ready configuration is included for `.app` and `.dmg` bundles.
+* **Windows**: Visual Studio C++ Build Tools or MinGW toolchain installed.
+* **macOS / Apple**: Compile-ready configuration is included for `.app` and `.dmg` bundles, but **testing on physical Mac hardware has not been performed**.
 
 
 ### 1. Run in Development Mode
@@ -40,9 +44,9 @@ To package the app into single, optimized desktop installers with zero runtime d
    npx tauri build
    ```
 2. Find the packaged outputs:
-   * **Windows**: `src-tauri/target/release/MusicDL.exe` (executable), `src-tauri/target/release/bundle/nsis/` (`.exe` installer), and `src-tauri/target/release/bundle/msi/` (`.msi` package).
-   * **macOS**: `src-tauri/target/release/bundle/macos/MusicDL.app` and `src-tauri/target/release/bundle/dmg/` (`.dmg` installer).
-   * **Linux**: `src-tauri/target/release/bundle/deb/` (`.deb` Debian package) and `src-tauri/target/release/bundle/rpm/` (`.rpm` Fedora package). *(Note: AppImage bundling is currently disabled).*
+   * **Linux**: `src-tauri/target/release/bundle/deb/` (`.deb` Debian package) and `src-tauri/target/release/bundle/rpm/` (`.rpm` Fedora package).
+   * **Windows**: `src-tauri/target/release/MusicDL.exe` (standalone executable), `src-tauri/target/release/bundle/nsis/` (`.exe` installer), and `src-tauri/target/release/bundle/msi/` (`.msi` installer).
+   * **macOS**: `src-tauri/target/release/bundle/macos/MusicDL.app` and `src-tauri/target/release/bundle/dmg/` (`.dmg` installer) *(Note: macOS hardware testing has not been performed).*
 
 ### 3. Load and Play a Sample Song
 1. Click the **"📂 Open Folder"** button in the top toolbar of the desktop app.
