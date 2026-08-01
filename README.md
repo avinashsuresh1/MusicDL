@@ -5,7 +5,9 @@
 Think of it like writing code, but the output is a musical composition!
 
 > [!WARNING]
-> **Branch & Release Policy**: Code on the `main` / `master` branch is considered **unstable** and in active development. Official release branches (e.g., [`RELEASE_1.1.3`](https://github.com/avinashsuresh1/MusicDL/tree/RELEASE_1.1.3), [`RELEASE_1.1.2`](https://github.com/avinashsuresh1/MusicDL/tree/RELEASE_1.1.2)) are created when changes are finalized, verified, and stable without regressions. Always use release branches for stable deployment.
+> **Branch & Release Policy**:
+> * **`main` / `master` Branch**: Used for active development. Code here is in-progress and considered **unstable**.
+> * **`RELEASE_<version>` Branches**: Used for official production releases (e.g., [`RELEASE_1.1.4`](https://github.com/avinashsuresh1/MusicDL/tree/RELEASE_1.1.4), [`RELEASE_1.1.3`](https://github.com/avinashsuresh1/MusicDL/tree/RELEASE_1.1.3)). Created when changes are finalized, verified, and stable without regressions. Always use release branches for stable deployment.
 
 ---
 
@@ -41,10 +43,11 @@ To run the interactive desktop editor locally:
 To package the app into single, optimized desktop installers with zero runtime dependencies:
 1. Compile and bundle the app:
    ```bash
-   npx tauri build
+   npm run tauri:build
    ```
+   *(On Linux, this compiles `.deb`, `.rpm`, and packages `MusicDL.AppImage`. On Windows and macOS, it compiles native installers).*
 2. Find the packaged outputs:
-   * **Linux**: `src-tauri/target/release/bundle/deb/` (`.deb` Debian package) and `src-tauri/target/release/bundle/rpm/` (`.rpm` Fedora package).
+   * **Linux**: `src-tauri/target/release/bundle/deb/` (`.deb` Debian package), `src-tauri/target/release/bundle/rpm/` (`.rpm` Fedora package), and `src-tauri/target/release/bundle/appimage/` (`.AppImage` executable).
    * **Windows**: `src-tauri/target/release/MusicDL.exe` (standalone executable), `src-tauri/target/release/bundle/nsis/` (`.exe` installer), and `src-tauri/target/release/bundle/msi/` (`.msi` installer).
    * **macOS**: `src-tauri/target/release/bundle/macos/MusicDL.app` and `src-tauri/target/release/bundle/dmg/` (`.dmg` installer) *(Note: macOS hardware testing has not been performed).*
 

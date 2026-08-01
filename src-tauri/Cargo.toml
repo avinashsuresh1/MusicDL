@@ -1,7 +1,7 @@
 [package]
 name = "MusicDL"
-version = "1.1.3"
-description = "A Tauri App"
+version = "1.1.4"
+description = "A YAML-based music definition language core library"
 authors = ["you"]
 license = ""
 repository = ""
