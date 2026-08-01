@@ -5,7 +5,7 @@
 Think of it like writing code, but the output is a musical composition!
 
 > [!WARNING]
-> **Branch & Release Policy**: Code on the `main` / `master` branch is considered **unstable** and in active development. Official release tags (e.g., [`v1.1.3`](https://github.com/avinashsuresh1/MusicDL/releases/tag/v1.1.3), `v1.1.2`) are created only when changes are finalized, verified, and stable without regressions. Always use tagged releases for stable deployment.
+> **Branch & Release Policy**: Code on the `main` / `master` branch is considered **unstable** and in active development. Official release branches (e.g., [`RELEASE_1.1.3`](https://github.com/avinashsuresh1/MusicDL/tree/RELEASE_1.1.3), [`RELEASE_1.1.2`](https://github.com/avinashsuresh1/MusicDL/tree/RELEASE_1.1.2)) are created when changes are finalized, verified, and stable without regressions. Always use release branches for stable deployment.
 
 ---
 
