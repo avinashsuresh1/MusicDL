@@ -2,6 +2,7 @@
   "name": "musicdl",
   "version": "1.1.3",
   "description": "A YAML-based music definition language core library",
+  "type": "module",
   "private": true,
   "engines": {
     "node": ">=24.18.0"
@@ -11,7 +12,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "tauri:build": "tauri build && node scripts/bundle-appimage.js"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.11.4",

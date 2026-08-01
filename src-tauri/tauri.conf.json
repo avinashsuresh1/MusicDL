@@ -26,17 +26,24 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["deb", "rpm", "nsis", "msi", "app", "dmg"],
+    "targets": ["deb", "rpm", "appimage", "nsis", "msi", "app", "dmg"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
+      "icons/icon.png",
       "icons/icon.icns",
       "icons/icon.ico"
     ],
     "linux": {
       "appimage": {
         "bundleMediaFramework": false
+      },
+      "deb": {
+        "depends": ["libasound2"]
+      },
+      "rpm": {
+        "depends": ["alsa-lib"]
       }
     },
     "android": {
