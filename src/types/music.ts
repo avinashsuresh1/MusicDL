@@ -22,6 +22,8 @@ export interface ADSR {
 export interface Instrument {
   /** Instrument name (derived from filename) */
   name: string;
+  /** Optional integer octave register shift (e.g., -1 for 1 octave lower, +1 for 1 octave higher) */
+  octaveShift?: number;
   /** Array of harmonic partials that define the instrument's timbre */
   harmonics: Harmonic[];
   /** Optional volume envelope */

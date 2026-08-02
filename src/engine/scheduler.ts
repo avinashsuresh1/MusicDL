@@ -96,7 +96,8 @@ export function getScheduledNotes(composition: Composition): ScheduledNote[] {
               const absoluteOffset = note.offset + melodyOffset;
               const startTime = beatsToSeconds(absoluteOffset, composition.tempo);
               const duration = beatsToSeconds(note.duration, composition.tempo);
-              const frequency = intervalToFrequency(note.pitch, composition.rootFrequency, composition.interval);
+              const totalPitch = note.pitch + (instrument.octaveShift ?? 0) * 12;
+              const frequency = intervalToFrequency(totalPitch, composition.rootFrequency, composition.interval);
               scheduledNotes.push({
                 frequency,
                 startTime,
@@ -116,7 +117,8 @@ export function getScheduledNotes(composition: Composition): ScheduledNote[] {
                 const absoluteOffset = melodyOffset + currentLoopStartBeats + relativeOffset;
                 const startTime = beatsToSeconds(absoluteOffset, composition.tempo);
                 const duration = beatsToSeconds(note.duration, composition.tempo);
-                const frequency = intervalToFrequency(note.pitch, composition.rootFrequency, composition.interval);
+                const totalPitch = note.pitch + (instrument.octaveShift ?? 0) * 12;
+                const frequency = intervalToFrequency(totalPitch, composition.rootFrequency, composition.interval);
                 scheduledNotes.push({
                   frequency,
                   startTime,
@@ -138,7 +140,8 @@ export function getScheduledNotes(composition: Composition): ScheduledNote[] {
             const absoluteOffset = note.offset + melodyOffset;
             const startTime = beatsToSeconds(absoluteOffset, composition.tempo);
             const duration = beatsToSeconds(note.duration, composition.tempo);
-            const frequency = intervalToFrequency(note.pitch, composition.rootFrequency, composition.interval);
+            const totalPitch = note.pitch + (instrument.octaveShift ?? 0) * 12;
+            const frequency = intervalToFrequency(totalPitch, composition.rootFrequency, composition.interval);
 
             scheduledNotes.push({
               frequency,
@@ -168,7 +171,8 @@ export function getScheduledNotes(composition: Composition): ScheduledNote[] {
         for (const pitch of chord.pitches) {
           const startTime = beatsToSeconds(chordRef.offset, composition.tempo);
           const duration = beatsToSeconds(chordRef.duration, composition.tempo);
-          const frequency = intervalToFrequency(pitch, composition.rootFrequency, composition.interval);
+          const totalPitch = pitch + (instrument.octaveShift ?? 0) * 12;
+          const frequency = intervalToFrequency(totalPitch, composition.rootFrequency, composition.interval);
 
           scheduledNotes.push({
             frequency,

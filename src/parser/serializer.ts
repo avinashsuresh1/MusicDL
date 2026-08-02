@@ -18,12 +18,14 @@ export function serializeCompositionMeta(composition: Composition): string {
  * Convert a single instrument into YAML.
  */
 export function serializeInstrument(instrument: Instrument): string {
-  const data: any = {
-    harmonics: instrument.harmonics.map(h => ({
-      z: h.z,
-      amplitude: h.amplitude
-    }))
-  };
+  const data: any = {};
+  if (instrument.octaveShift !== undefined) {
+    data.octave_shift = instrument.octaveShift;
+  }
+  data.harmonics = instrument.harmonics.map(h => ({
+    z: h.z,
+    amplitude: h.amplitude
+  }));
   if (instrument.adsr) {
     data.adsr = {
       attack: instrument.adsr.attack,

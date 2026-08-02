@@ -67,7 +67,7 @@ export function parseInstrument(yamlContent: string, name: string): Instrument {
     throw new Error(`Instrument '${name}' must have a 'harmonics' list`);
   }
 
-  validateObjectKeys(data, new Set(['harmonics', 'adsr']), `Instrument '${name}'`);
+  validateObjectKeys(data, new Set(['harmonics', 'adsr', 'octave_shift', 'octaveShift']), `Instrument '${name}'`);
 
   const harmonics: Harmonic[] = data.harmonics.map((h: any, idx: number) => {
     validateObjectKeys(h, new Set(['z', 'amplitude']), `Instrument '${name}': harmonic[${idx}]`);
@@ -84,6 +84,14 @@ export function parseInstrument(yamlContent: string, name: string): Instrument {
   });
 
   const instrument: Instrument = { name, harmonics };
+
+  const octaveShift = data.octave_shift ?? data.octaveShift;
+  if (octaveShift !== undefined) {
+    if (typeof octaveShift !== 'number' || isNaN(octaveShift) || !Number.isInteger(octaveShift)) {
+      throw new Error(`Instrument '${name}': 'octave_shift' must be an integer`);
+    }
+    instrument.octaveShift = octaveShift;
+  }
 
   if (data.adsr) {
     validateObjectKeys(data.adsr, new Set(['attack', 'decay', 'sustain', 'release']), `Instrument '${name}': adsr`);

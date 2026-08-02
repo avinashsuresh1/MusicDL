@@ -147,4 +147,18 @@ notes:
     expect(lead.loopStart).toBe(1.0);
     expect(lead.loopEnd).toBe(3.0);
   });
+
+  it('should parse instrument-level octave_shift correctly', () => {
+    const filesWithInstRoot = {
+      ...validFiles,
+      'instruments/bass.yaml': `
+octave_shift: -1
+harmonics:
+  - { z: 1, amplitude: 1.0 }
+`
+    };
+    const comp = parseProject(filesWithInstRoot);
+    expect(comp.instruments['bass']).toBeDefined();
+    expect(comp.instruments['bass'].octaveShift).toBe(-1);
+  });
 });

@@ -132,4 +132,41 @@ describe('scheduler', () => {
     expect(loopNotes[1].startTime).toBeCloseTo(1.0, 4); // beat 2.0 -> 1.0s
     expect(loopNotes[2].startTime).toBeCloseTo(1.5, 4); // beat 3.0 -> 1.5s
   });
+
+  it('should apply instrument-level octaveShift to note pitch when defined', () => {
+    const instRootComp: Composition = {
+      title: "Instrument Root Test",
+      tempo: 120,
+      rootFrequency: 261.63, // C4
+      interval: 100,
+      instruments: {
+        bass: {
+          name: "bass",
+          octaveShift: -1, // 1 octave down -> C3 (130.81Hz)
+          harmonics: [{ z: 1, amplitude: 1.0 }]
+        }
+      },
+      melodies: {
+        bassline: {
+          name: "bassline",
+          instrument: "bass",
+          notes: [
+            { pitch: 0, offset: 0, duration: 1 }
+          ]
+        }
+      },
+      tracks: [
+        {
+          name: "bass_track",
+          volume: 0.8,
+          melodies: ["bassline"]
+        }
+      ]
+    };
+
+    const notes = getScheduledNotes(instRootComp);
+    expect(notes).toHaveLength(1);
+    // Pitch 0 + octaveShift -1 (12 semitones down) at rootFrequency 261.63Hz should yield 130.81Hz
+    expect(notes[0].frequency).toBeCloseTo(130.81, 1);
+  });
 });

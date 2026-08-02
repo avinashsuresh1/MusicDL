@@ -19,6 +19,12 @@ export function validateInstrument(instrument: Instrument, name: string): Valida
   const errors: ValidationError[] = [];
   const path = `instruments/${name}.yaml`;
 
+  if (instrument.octaveShift !== undefined) {
+    if (typeof instrument.octaveShift !== 'number' || isNaN(instrument.octaveShift) || !Number.isInteger(instrument.octaveShift)) {
+      errors.push({ path, message: `Instrument '${name}': 'octave_shift' must be an integer, got ${instrument.octaveShift}` });
+    }
+  }
+
   if (!instrument.harmonics || !Array.isArray(instrument.harmonics) || instrument.harmonics.length === 0) {
     errors.push({ path, message: `Instrument '${name}' must have at least one harmonic` });
     return errors;
