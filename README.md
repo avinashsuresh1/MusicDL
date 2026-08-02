@@ -76,7 +76,7 @@ interval: 100          # Step size in cents (e.g., 100 cents = 1 semitone in 12-
 ```
 
 > [!TIP]
-> **Octave Transposition via `root_frequency`**: Changing `root_frequency` transposes the entire scale into any instrument's optimal acoustic register ($130.81\text{ Hz}$ for Sub Bass, $261.63\text{ Hz}$ for Bansuri/Piano, $523.25\text{ Hz}$ for Flute/Bells).
+> **Key Transposition via `root_frequency`**: Changing `root_frequency` transposes the **entire composition** to a new root frequency/key (e.g., $261.63\text{ Hz}$ for C4, $440.0\text{ Hz}$ for A4). To shift an individual instrument's acoustic register independently without affecting the rest of the song, use **`octave_shift`** in that instrument's YAML definition file.
 
 ### 2. Code-Defined Instruments (`instruments/`)
 MusicDL enables you to craft full acoustic and synthetic instruments **using nothing but code**. You define timbres with **additive synthesis** (harmonic partial multipliers $z$ and amplitudes), **ADSR envelopes**, and optional **`octave_shift`** register placement:
