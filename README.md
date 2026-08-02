@@ -7,7 +7,7 @@ Think of it like writing code, but the output is a musical composition!
 > [!WARNING]
 > **Branch & Release Policy**:
 > * **`main` / `master` Branch**: Used for active development. Code here is in-progress and considered **unstable**.
-> * **`RELEASE_<version>` Branches**: Used for official production releases (e.g., [`RELEASE_1.1.4`](https://github.com/avinashsuresh1/MusicDL/tree/RELEASE_1.1.4), [`RELEASE_1.1.3`](https://github.com/avinashsuresh1/MusicDL/tree/RELEASE_1.1.3)). Created when changes are finalized, verified, and stable without regressions. Always use release branches for stable deployment.
+> * **`RELEASE_<version>` Branches**: Used for official production releases (e.g., [`RELEASE_1.1.5`](https://github.com/avinashsuresh1/MusicDL/tree/RELEASE_1.1.5), [`RELEASE_1.1.4`](https://github.com/avinashsuresh1/MusicDL/tree/RELEASE_1.1.4)). Created when changes are finalized, verified, and stable without regressions. Always use release branches for stable deployment.
 
 ---
 
@@ -59,8 +59,6 @@ To package the app into single, optimized desktop installers with zero runtime d
 5. Make edits to the YAML files directly in the editor and click **"Save"** to write back directly to the local folder!
 
 ---
-
-## ✍️ How to Compose and Edit
 
 A MusicDL project is organized into five simple components:
 
