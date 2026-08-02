@@ -58,6 +58,11 @@ try {
   fs.mkdirSync(outDir, { recursive: true });
   const outPath = path.join(outDir, 'MusicDL.AppImage');
 
+  // Force-delete any existing AppImage to ensure fresh bundle generation
+  if (fs.existsSync(outPath)) {
+    fs.rmSync(outPath, { force: true });
+  }
+
   execSync(`APPIMAGE_EXTRACT_AND_RUN=1 ${appimageTool} "${appDir}" "${outPath}"`, { stdio: 'inherit' });
   console.log(`✅ Native AppImage successfully created: ${outPath}`);
 } catch (err) {
