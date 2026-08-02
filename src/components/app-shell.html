@@ -74,14 +74,18 @@ harmonics:
         <li><code>amplitude</code>: Level of this partial (float between <code>0.0</code> and <code>1.0</code>).</li>
       </ul>
 
-      <h3>ADSR Envelope Schema</h3>
-      <p>Specifies how the volume of the note shapes over time (optional, defaults to a fast 10ms attack and 50ms release):</p>
-      <div class="code-block"># instruments/sine_pad.yaml (continued)
-adsr:
-  attack: 150    # Attack duration in milliseconds (fade in)
-  decay: 200     # Decay duration in milliseconds (ramp to sustain level)
-  sustain: 0.6   # Sustain volume level (float, 0.0 - 1.0)
-  release: 600   # Release duration in milliseconds (fade out after release)</div>
+      <h3>Octave Register Shift (`octave_shift`) & Clefs</h3>
+      <p>Specifies an integer octave register shift for the instrument (e.g., <code>-1</code> for 1 octave lower, <code>1</code> for 1 octave higher):</p>
+      <div class="code-block"># instruments/sub_bass.yaml
+octave_shift: -1 # Shift 1 octave lower (-12 semitones)
+harmonics:
+  - { z: 1, amplitude: 1.0 }</div>
+      <p><strong>Musical Clefs Connection:</strong> In traditional musical notation, instruments use <strong>Clefs</strong> to write notes in their acoustic register. <code>octave_shift</code> is the general mathematical primitive representing musical clefs:</p>
+      <ul>
+        <li><code>octave_shift: -1</code> or <code>-2</code> &hArr; <strong>Bass Clef / 8vb</strong> (Sub Bass, Cello, Tuba)</li>
+        <li><code>octave_shift: 0</code> &hArr; <strong>Alto / Tenor / Treble Clef</strong> (Piano, Flute, Strings)</li>
+        <li><code>octave_shift: 1</code> or <code>2</code> &hArr; <strong>Treble 8va</strong> (Piccolo, High Bells)</li>
+      </ul>
 
       <h3>Code-Defined Instrument Presets</h3>
       <p>MusicDL empowers you to craft rich instruments purely out of code. Here are several ready-to-use instrument definitions:</p>
