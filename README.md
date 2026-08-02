@@ -75,8 +75,9 @@ interval: 100          # Step size in cents (e.g., 100 cents = 1 semitone in 12-
 > **Octave Transposition via `root_frequency`**: Changing `root_frequency` transposes the entire scale into any instrument's optimal acoustic register ($130.81\text{ Hz}$ for Sub Bass, $261.63\text{ Hz}$ for Bansuri/Piano, $523.25\text{ Hz}$ for Flute/Bells).
 
 ### 2. Code-Defined Instruments (`instruments/`)
-MusicDL enables you to craft full acoustic and synthetic instruments **using nothing but code**. You define timbres with **additive synthesis** (harmonic partial multipliers $z$ and amplitudes) and **ADSR envelopes**:
+MusicDL enables you to craft full acoustic and synthetic instruments **using nothing but code**. You define timbres with **additive synthesis** (harmonic partial multipliers $z$ and amplitudes), **ADSR envelopes**, and optional **`octave_shift`** register placement:
 ```yaml
+octave_shift: -1 # Optional: Shift instrument register by octaves (-1 = 1 octave down, 1 = 1 octave up)
 harmonics:
   - { z: 1, amplitude: 1.0 }   # Fundamental tone
   - { z: 2, amplitude: 0.5 }   # One octave higher
@@ -88,6 +89,15 @@ adsr:
   release: 600   # Ring-out time after note finishes (in milliseconds)
 ```
 
+> [!TIP]
+> **Mathematical Register Placement & Musical Clefs**:
+> In traditional sheet music notation, instruments use **Clefs** (Bass Clef, Treble Clef, $8^{va}$, $8^{vb}$) to write notes in their natural acoustic register. In MusicDL, **`octave_shift`** is the general mathematical primitive:
+> * `octave_shift: -1` or `-2` $\iff$ **Bass Clef / $8^{vb}$** (Sub Bass, Cello, Tuba)
+> * `octave_shift: 0` $\iff$ **Alto / Tenor / Treble Clef** (Piano, Guitar, Viola)
+> * `octave_shift: 1` or `2` $\iff$ **Treble $8^{va}$** (Piccolo, Glockenspiel, High Bells)
+>
+> Because `octave_shift` uses pure integer octave multipliers, instruments automatically play in their natural register while staying in **100% perfect harmonic tune** with the composition!
+
 #### Verified Code-Defined Instrument Presets
 * **Bansuri (Indian Bamboo Flute)** (`bansuri.yaml`): `harmonics: [{z: 1, amp: 0.2}, {z: 3, amp: 0.2}, {z: 0.1, amp: 0.0025}], adsr: {attack: 800, decay: 100, sustain: 0.3, release: 200}`
 * **Flute** (`flute.yaml`): `harmonics: [{z: 1.0, amp: 1.0}, {z: 2.0, amp: 0.12}, {z: 0.5, amp: 0.08}, {z: 3.0, amp: 0.04}], adsr: {attack: 50, decay: 40, sustain: 0.92, release: 200}`
@@ -95,7 +105,7 @@ adsr:
 * **Tubular Bell** (`bell.yaml`): `harmonics: [{z: 1.0, amp: 1.0}, {z: 2.76, amp: 0.5}, {z: 5.4, amp: 0.25}], adsr: {attack: 1, decay: 400, sustain: 0.0, release: 1200}`
 * **String Ensemble** (`strings.yaml`): `harmonics: [{z: 1, amp: 1.0}, {z: 2, amp: 0.7}, {z: 3, amp: 0.45}], adsr: {attack: 150, decay: 200, sustain: 0.85, release: 600}`
 * **Plucked Guitar** (`guitar.yaml`): `harmonics: [{z: 1, amp: 1.0}, {z: 2, amp: 0.4}, {z: 3, amp: 0.2}], adsr: {attack: 2, decay: 150, sustain: 0.15, release: 120}`
-* **80s Sub Bass Synth** (`sub_bass.yaml`): `harmonics: [{z: 0.5, amp: 0.4}, {z: 1, amp: 1.0}, {z: 2, amp: 0.6}], adsr: {attack: 10, decay: 120, sustain: 0.7, release: 100}`
+* **80s Sub Bass Synth** (`sub_bass.yaml`): `octave_shift: -1, harmonics: [{z: 0.5, amp: 0.4}, {z: 1, amp: 1.0}, {z: 2, amp: 0.6}], adsr: {attack: 10, decay: 120, sustain: 0.7, release: 100}`
 
 ### 3. Melodies (`melodies/`)
 Write sequential notes. Notes play sequentially (one after another); **offsets are not used in melodies**. You can also configure a melody to loop continuously to fill the composition duration:
