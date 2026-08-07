@@ -1,4 +1,10 @@
 import { store } from '../state/store.js';
+import { audioEngine } from '../engine/audio-engine.js';
+import {
+  getScheduledNotesForInstrument,
+  getScheduledNotesForMelody,
+  getScheduledNotesForChord
+} from '../engine/scheduler.js';
 import styleText from './app-shell.css?inline';
 import htmlText from './app-shell.html?raw';
 
@@ -100,6 +106,42 @@ export class AppShell extends HTMLElement {
         btn.classList.add('active');
         this.shadowRoot!.querySelector(`#${tabId}`)!.classList.add('active');
       });
+    });
+
+    // Handle 🧪 test triggers and Alt+T shortcut
+    const handleTestFile = (path?: string) => {
+      const activePath = path || store.getActiveFilePath();
+      const comp = store.getComposition();
+      if (!comp || !activePath) return;
+
+      const parts = activePath.split('/');
+      if (parts.length < 2) return;
+
+      const folder = parts[0];
+      const name = parts[1].replace('.yaml', '');
+
+      let notes: any[] = [];
+      if (folder === 'instruments') {
+        notes = getScheduledNotesForInstrument(name, comp);
+      } else if (folder === 'melodies') {
+        notes = getScheduledNotesForMelody(name, comp);
+      } else if (folder === 'chords') {
+        notes = getScheduledNotesForChord(name, comp);
+      }
+
+      if (notes.length > 0) {
+        audioEngine.playPreview(notes);
+      }
+    };
+
+    this.addEventListener('trigger-test', () => handleTestFile());
+    this.addEventListener('trigger-test-file', (e: any) => handleTestFile(e.detail.path));
+
+    window.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.altKey && (e.key === 't' || e.key === 'T')) {
+        e.preventDefault();
+        handleTestFile();
+      }
     });
   }
 

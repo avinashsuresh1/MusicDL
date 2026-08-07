@@ -327,6 +327,7 @@ export class Toolbar extends HTMLElement {
     const newBtn = this.shadowRoot!.querySelector('#btn-new')!;
     const saveBtn = this.shadowRoot!.querySelector('#btn-save')!;
     const demoBtn = this.shadowRoot!.querySelector('#btn-demo')!;
+    const testBtn = this.shadowRoot!.querySelector('#btn-test')!;
     const helpBtn = this.shadowRoot!.querySelector('#btn-help')!;
     
     const timeDisplay = this.shadowRoot!.querySelector('.time-display')!;
@@ -341,8 +342,27 @@ export class Toolbar extends HTMLElement {
     });
 
     // Transport buttons
-    playBtn.addEventListener('click', () => audioEngine.play(store.getComposition() ?? undefined));
+    playBtn.addEventListener('click', () => {
+      const state = (audioEngine as any).state;
+      if (state === 'playing') {
+        audioEngine.pause();
+      } else {
+        audioEngine.play(store.getComposition() ?? undefined);
+      }
+    });
     stopBtn.addEventListener('click', () => audioEngine.stop());
+    testBtn.addEventListener('click', () => {
+      this.dispatchEvent(new CustomEvent('trigger-test', { bubbles: true, composed: true }));
+    });
+
+    audioEngine.addEventListener('state-changed', (e: any) => {
+      const state = e.detail.state;
+      if (state === 'playing') {
+        playBtn.innerHTML = `⏸ Pause`;
+      } else {
+        playBtn.innerHTML = `▶ Run`;
+      }
+    });
 
     // Listen to rendering states to show visual loading feedback
     audioEngine.addEventListener('rendering', (e: any) => {
@@ -353,7 +373,8 @@ export class Toolbar extends HTMLElement {
         playBtn.setAttribute('disabled', 'true');
       } else {
         playBtn.classList.remove('rendering');
-        playBtn.innerHTML = `▶ Run`;
+        const state = (audioEngine as any).state;
+        playBtn.innerHTML = state === 'playing' ? `⏸ Pause` : `▶ Run`;
         playBtn.removeAttribute('disabled');
       }
     });

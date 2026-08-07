@@ -194,3 +194,83 @@ export function getScheduledNotes(composition: Composition): ScheduledNote[] {
     return a.frequency - b.frequency;
   });
 }
+
+/**
+ * Schedules a single audition note for testing an instrument's timbre.
+ * Plays 1 single note at pitch 0 (root frequency, shifted by octaveShift if defined) for 1.5 seconds.
+ */
+export function getScheduledNotesForInstrument(instrumentName: string, composition: Composition): ScheduledNote[] {
+  const instrument = composition.instruments[instrumentName];
+  if (!instrument) return [];
+
+  const totalPitch = (instrument.octaveShift ?? 0) * 12;
+  const frequency = intervalToFrequency(totalPitch, composition.rootFrequency, composition.interval);
+
+  return [{
+    frequency,
+    startTime: 0,
+    duration: 1.5,
+    instrument,
+    volume: 0.8
+  }];
+}
+
+/**
+ * Schedules notes for a single melody starting at t = 0.
+ */
+export function getScheduledNotesForMelody(melodyName: string, composition: Composition): ScheduledNote[] {
+  const melody = composition.melodies[melodyName];
+  if (!melody) return [];
+
+  const instrument = composition.instruments[melody.instrument];
+  if (!instrument) return [];
+
+  const scheduledNotes: ScheduledNote[] = [];
+  for (const note of melody.notes) {
+    if (isRest(note.pitch)) continue;
+
+    const startTime = beatsToSeconds(note.offset, composition.tempo);
+    const duration = beatsToSeconds(note.duration, composition.tempo);
+    const totalPitch = note.pitch + (instrument.octaveShift ?? 0) * 12;
+    const frequency = intervalToFrequency(totalPitch, composition.rootFrequency, composition.interval);
+
+    scheduledNotes.push({
+      frequency,
+      startTime,
+      duration,
+      instrument,
+      volume: 0.8
+    });
+  }
+
+  return scheduledNotes.sort((a, b) => a.startTime - b.startTime || a.frequency - b.frequency);
+}
+
+/**
+ * Schedules notes for a single chord starting at t = 0 (striking all pitches simultaneously for 2 beats).
+ */
+export function getScheduledNotesForChord(chordName: string, composition: Composition): ScheduledNote[] {
+  const chord = composition.chords?.[chordName];
+  if (!chord) return [];
+
+  const instrument = composition.instruments[chord.instrument];
+  if (!instrument) return [];
+
+  const duration = beatsToSeconds(2.0, composition.tempo); // 2 beats preview
+  const scheduledNotes: ScheduledNote[] = [];
+
+  for (const pitch of chord.pitches) {
+    const totalPitch = pitch + (instrument.octaveShift ?? 0) * 12;
+    const frequency = intervalToFrequency(totalPitch, composition.rootFrequency, composition.interval);
+
+    scheduledNotes.push({
+      frequency,
+      startTime: 0,
+      duration,
+      instrument,
+      volume: 0.8
+    });
+  }
+
+  return scheduledNotes;
+}

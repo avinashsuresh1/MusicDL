@@ -303,6 +303,40 @@ export class AudioEngine extends EventTarget {
     }
   }
 
+  async playPreview(notes: ScheduledNote[]) {
+    if (!notes || notes.length === 0) return;
+    this.initAudio();
+
+    // Pause master composition playback if playing
+    if (this.state === 'playing') {
+      await this.pause();
+    }
+
+    const sampleRate = this.ctx?.sampleRate ?? 44100;
+    const previewSamples = renderToSamples(notes, sampleRate);
+
+    if (isTauri()) {
+      try {
+        const samplesArray = Array.from(previewSamples);
+        await invoke('play_samples', {
+          samples: samplesArray,
+          sampleRate,
+          startOffset: 0,
+        });
+      } catch (err) {
+        console.error('Tauri preview playback failed:', err);
+      }
+    } else {
+      const buffer = this.ctx!.createBuffer(2, previewSamples.length, sampleRate);
+      buffer.copyToChannel(previewSamples as any, 0);
+      buffer.copyToChannel(previewSamples as any, 1);
+      const source = this.ctx!.createBufferSource();
+      source.buffer = buffer;
+      source.connect(this.masterGain!);
+      source.start();
+    }
+  }
+
   private getPlaybackPositionSeconds(): number {
     if (this.state === 'playing' && this.ctx) {
       return this.currentOffset + (this.ctx.currentTime - this.playStartCtxTime);

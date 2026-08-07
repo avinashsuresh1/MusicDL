@@ -113,6 +113,7 @@ export class Explorer extends HTMLElement {
               <span class="name">${fileName}</span>
             </div>
             <div class="actions">
+              ${(folderName === 'instruments' || folderName === 'melodies' || folderName === 'chords' || folderName === 'tracks') ? `<button class="action-btn btn-test-file" title="Test File" data-path="${path}">🧪</button>` : ''}
               <button class="action-btn btn-rename" title="Rename" data-path="${path}">✏️</button>
               <button class="action-btn btn-delete" title="Delete" data-path="${path}">🗑️</button>
             </div>
@@ -127,6 +128,16 @@ export class Explorer extends HTMLElement {
     html += `</div>`;
 
     this.shadowRoot!.innerHTML = html;
+
+    // Attach test file listeners
+    const testBtns = this.shadowRoot!.querySelectorAll('.btn-test-file');
+    testBtns.forEach(btn => {
+      btn.addEventListener('click', (e: Event) => {
+        e.stopPropagation();
+        const path = (btn as HTMLElement).getAttribute('data-path')!;
+        this.dispatchEvent(new CustomEvent('trigger-test-file', { bubbles: true, composed: true, detail: { path } }));
+      });
+    });
 
     // Attach click listeners
     const items = this.shadowRoot!.querySelectorAll('.file-item');

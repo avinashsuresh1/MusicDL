@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getScheduledNotes } from '../src/engine/scheduler.js';
+import { getScheduledNotes, getScheduledNotesForInstrument, getScheduledNotesForMelody, getScheduledNotesForChord } from '../src/engine/scheduler.js';
 import type { Composition } from '../src/types/music.js';
 import { intervalToFrequency } from '../src/utils/note-utils.js';
 
@@ -168,5 +168,37 @@ describe('scheduler', () => {
     expect(notes).toHaveLength(1);
     // Pitch 0 + octaveShift -1 (12 semitones down) at rootFrequency 261.63Hz should yield 130.81Hz
     expect(notes[0].frequency).toBeCloseTo(130.81, 1);
+  });
+
+  it('should generate audition note for an instrument', () => {
+    const notes = getScheduledNotesForInstrument('sine', testComp);
+    expect(notes).toHaveLength(1);
+    expect(notes[0].frequency).toBeCloseTo(261.63, 1);
+    expect(notes[0].duration).toBe(1.5);
+  });
+
+  it('should generate scheduled notes for a single melody from t=0', () => {
+    const notes = getScheduledNotesForMelody('melody1', testComp);
+    expect(notes).toHaveLength(2); // 2 non-rest notes in melody1
+    expect(notes[0].startTime).toBe(0);
+    expect(notes[1].startTime).toBe(0.5);
+  });
+
+  it('should generate scheduled notes for a single chord from t=0', () => {
+    const chordComp: Composition = {
+      ...testComp,
+      chords: {
+        triad: {
+          name: "triad",
+          instrument: "sine",
+          pitches: [0, 4, 7]
+        }
+      }
+    };
+    const notes = getScheduledNotesForChord('triad', chordComp);
+    expect(notes).toHaveLength(3);
+    expect(notes[0].startTime).toBe(0);
+    expect(notes[1].startTime).toBe(0);
+    expect(notes[2].startTime).toBe(0);
   });
 });
