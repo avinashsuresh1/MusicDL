@@ -7,7 +7,7 @@ Think of it like writing code, but the output is a musical composition!
 > [!WARNING]
 > **Branch & Release Policy**:
 > * **`main` / `master` Branch**: Used for active development. Code here is in-progress and considered **unstable**.
-> * **`RELEASE_<version>` Branches**: Used for official production releases (e.g., [`RELEASE_1.1.5`](https://github.com/avinashsuresh1/MusicDL/tree/RELEASE_1.1.5), [`RELEASE_1.1.4`](https://github.com/avinashsuresh1/MusicDL/tree/RELEASE_1.1.4)). Created when changes are finalized, verified, and stable without regressions. Always use release branches for stable deployment.
+> * **`RELEASE_<version>` Branches**: Used for official production releases (e.g., [`RELEASE_1.1.6`](https://github.com/avinashsuresh1/MusicDL/tree/RELEASE_1.1.6), [`RELEASE_1.1.5`](https://github.com/avinashsuresh1/MusicDL/tree/RELEASE_1.1.5)). Created when changes are finalized, verified, and stable without regressions. Always use release branches for stable deployment.
 
 ---
 
