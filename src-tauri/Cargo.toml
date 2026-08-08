@@ -1,6 +1,6 @@
 [package]
 name = "MusicDL"
-version = "1.1.6"
+version = "1.1.7"
 description = "A YAML-based music definition language core library"
 authors = ["you"]
 license = ""
