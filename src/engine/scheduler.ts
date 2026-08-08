@@ -274,3 +274,18 @@ export function getScheduledNotesForChord(chordName: string, composition: Compos
 
   return scheduledNotes;
 }
+
+/**
+ * Schedules notes for a single track (soloing that track in isolation).
+ */
+export function getScheduledNotesForTrack(trackName: string, composition: Composition): ScheduledNote[] {
+  const track = composition.tracks.find(t => t.name === trackName);
+  if (!track) return [];
+
+  const trackComposition: Composition = {
+    ...composition,
+    tracks: [track]
+  };
+
+  return getScheduledNotes(trackComposition);
+}

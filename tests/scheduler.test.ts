@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getScheduledNotes, getScheduledNotesForInstrument, getScheduledNotesForMelody, getScheduledNotesForChord } from '../src/engine/scheduler.js';
+import { getScheduledNotes, getScheduledNotesForInstrument, getScheduledNotesForMelody, getScheduledNotesForChord, getScheduledNotesForTrack } from '../src/engine/scheduler.js';
 import type { Composition } from '../src/types/music.js';
 import { intervalToFrequency } from '../src/utils/note-utils.js';
 
@@ -200,5 +200,11 @@ describe('scheduler', () => {
     expect(notes[0].startTime).toBe(0);
     expect(notes[1].startTime).toBe(0);
     expect(notes[2].startTime).toBe(0);
+  });
+
+  it('should generate scheduled notes for a single track (soloing that track)', () => {
+    const notes = getScheduledNotesForTrack('track1', testComp);
+    expect(notes.length).toBeGreaterThan(0);
+    expect(notes[0].instrument.name).toBe('sine');
   });
 });

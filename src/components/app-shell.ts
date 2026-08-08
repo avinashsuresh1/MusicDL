@@ -3,7 +3,8 @@ import { audioEngine } from '../engine/audio-engine.js';
 import {
   getScheduledNotesForInstrument,
   getScheduledNotesForMelody,
-  getScheduledNotesForChord
+  getScheduledNotesForChord,
+  getScheduledNotesForTrack
 } from '../engine/scheduler.js';
 import styleText from './app-shell.css?inline';
 import htmlText from './app-shell.html?raw';
@@ -127,6 +128,8 @@ export class AppShell extends HTMLElement {
         notes = getScheduledNotesForMelody(name, comp);
       } else if (folder === 'chords') {
         notes = getScheduledNotesForChord(name, comp);
+      } else if (folder === 'tracks') {
+        notes = getScheduledNotesForTrack(name, comp);
       }
 
       if (notes.length > 0) {
