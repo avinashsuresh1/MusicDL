@@ -184,9 +184,6 @@ export class ProjectStore extends EventTarget {
     
     const melody = this.composition.melodies[melodyName];
     melody.notes.push(note);
-    
-    // Sort notes
-    melody.notes.sort((a, b) => a.offset - b.offset);
 
     // Update files map & reparse
     const yamlStr = serializeMelody(melody);
@@ -200,7 +197,6 @@ export class ProjectStore extends EventTarget {
     const melody = this.composition.melodies[melodyName];
     if (index >= 0 && index < melody.notes.length) {
       melody.notes[index] = updatedNote;
-      melody.notes.sort((a, b) => a.offset - b.offset);
 
       const yamlStr = serializeMelody(melody);
       this.files[`melodies/${melodyName}.yaml`] = yamlStr;

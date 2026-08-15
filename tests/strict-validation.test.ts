@@ -16,7 +16,7 @@ harmonics:
     'melodies/lead.yaml': `
 instrument: synth
 notes:
-  - { pitch: 0, offset: 0, duration: 1 }
+  - { pitch: 0, duration: 1 }
 `,
     'tracks/melody_track.yaml': `
 volume: 0.9
@@ -75,7 +75,7 @@ adsr:
       'melodies/lead.yaml': `
 instrument: synth
 notes:
-  - { pitch: 0, offset: 0, duration: 1 }
+  - { pitch: 0, duration: 1 }
 melody_wrong: true
 `
     };
@@ -88,7 +88,7 @@ melody_wrong: true
       'melodies/lead.yaml': `
 instrument: synth
 notes:
-  - { pitch: 0, offset: 0, duration: 1, offset_wrong: 5 }
+  - { pitch: 0, duration: 1, offset_wrong: 5 }
 `
     };
     expect(() => parseProject(badFiles)).toThrow(/Unrecognized parameter 'offset_wrong'/);

@@ -20,16 +20,16 @@ describe('scheduler', () => {
         name: "melody1",
         instrument: "sine",
         notes: [
-          { pitch: 0, offset: 0, duration: 1 },    // 0.0s, C4 (261.63Hz)
-          { pitch: 'rest', offset: 1, duration: 1 } // 0.5s, rest (filtered)
+          { pitch: 0, duration: 1 },    // 0.0s, C4 (261.63Hz)
+          { pitch: 'rest', duration: 1 } // 0.5s, rest (filtered)
         ]
       },
       melody2: {
         name: "melody2",
         instrument: "sine",
         notes: [
-          { pitch: 12, offset: 2, duration: 2 },   // 1.0s, C5 (523.26Hz)
-          { pitch: 7, offset: 2, duration: 2 }     // 1.0s, G4 (392.00Hz)
+          { pitch: 12, duration: 2 },   // 1.0s, C5 (523.26Hz)
+          { pitch: 7, duration: 2 }     // 2.0s, G4 (392.00Hz)
         ]
       }
     },
@@ -79,7 +79,7 @@ describe('scheduler', () => {
         oneShot: {
           name: "oneShot",
           instrument: "sine",
-          notes: [{ pitch: 0, offset: 0, duration: 4 }] // ends at beat 4 (2.0s)
+          notes: [{ pitch: 0, duration: 4 }] // ends at beat 4 (2.0s)
         },
         looping: {
           name: "looping",
@@ -88,8 +88,8 @@ describe('scheduler', () => {
           loopStart: 1.0,
           loopEnd: 2.0,
           notes: [
-            { pitch: 4, offset: 0, duration: 1.0 }, // intro note
-            { pitch: 7, offset: 1.0, duration: 1.0 } // loop note (repeats every 1.0 beat)
+            { pitch: 4, duration: 1.0 }, // intro note (beat 0..1)
+            { pitch: 7, duration: 1.0 }  // loop note (beat 1..2)
           ]
         }
       },
@@ -109,15 +109,6 @@ describe('scheduler', () => {
 
     const notes = getScheduledNotes(loopComp);
 
-    // Non-looping composition duration is 4.0 beats.
-    // The looping melody has:
-    // - intro note at beat 0, dur 1
-    // - loop note at beat 1, repeating at beat 2, beat 3
-    // So we should have:
-    // - 1 oneShot note
-    // - 1 loop intro note
-    // - 3 loop repetitions of the loop note (at beats 1.0, 2.0, 3.0)
-    // Total = 5 scheduled notes.
     expect(notes).toHaveLength(5);
 
     // Verify intro note: starts at 0.0s (beat 0)
@@ -151,7 +142,7 @@ describe('scheduler', () => {
           name: "bassline",
           instrument: "bass",
           notes: [
-            { pitch: 0, offset: 0, duration: 1 }
+            { pitch: 0, duration: 1 }
           ]
         }
       },

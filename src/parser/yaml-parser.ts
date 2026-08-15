@@ -133,9 +133,8 @@ export function parseMelody(yamlContent: string, name: string): Melody {
     throw new Error(`Melody '${name}': 'notes' must be a list`);
   }
 
-  let currentOffset = 0;
   const notes: Note[] = data.notes.map((n: any, idx: number) => {
-    validateObjectKeys(n, new Set(['pitch', 'offset', 'duration']), `Melody '${name}': note[${idx}]`);
+    validateObjectKeys(n, new Set(['pitch', 'duration']), `Melody '${name}': note[${idx}]`);
     let pitch: number | 'rest';
     if (n.pitch === 'rest') {
       pitch = 'rest';
@@ -145,25 +144,12 @@ export function parseMelody(yamlContent: string, name: string): Melody {
       throw new Error(`Melody '${name}': note[${idx}] 'pitch' must be an integer or 'rest'`);
     }
 
-    let offset = n.offset;
-    if (offset !== undefined) {
-      if (typeof offset !== 'number' || isNaN(offset) || offset < 0) {
-        throw new Error(`Melody '${name}': note[${idx}] 'offset' must be a non-negative number`);
-      }
-      currentOffset = offset;
-    } else {
-      offset = currentOffset;
-    }
-
     if (typeof n.duration !== 'number' || isNaN(n.duration) || n.duration <= 0) {
       throw new Error(`Melody '${name}': note[${idx}] 'duration' must be a positive number`);
     }
 
-    currentOffset = offset + n.duration;
-
     return {
       pitch,
-      offset,
       duration: n.duration
     };
   });

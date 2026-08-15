@@ -17,9 +17,9 @@ harmonics:
     'melodies/lead.yaml': `
 instrument: synth
 notes:
-  - { pitch: 0, offset: 0, duration: 1 }
-  - { pitch: 4, offset: 1, duration: 1 }
-  - { pitch: rest, offset: 2, duration: 1 }
+  - { pitch: 0, duration: 1 }
+  - { pitch: 4, duration: 1 }
+  - { pitch: rest, duration: 1 }
 `,
     'tracks/melody_track.yaml': `
 volume: 0.9
@@ -43,8 +43,8 @@ melodies:
     expect(comp.melodies['lead']).toBeDefined();
     expect(comp.melodies['lead'].instrument).toBe('synth');
     expect(comp.melodies['lead'].notes).toHaveLength(3);
-    expect(comp.melodies['lead'].notes[0]).toEqual({ pitch: 0, offset: 0, duration: 1 });
-    expect(comp.melodies['lead'].notes[2]).toEqual({ pitch: 'rest', offset: 2, duration: 1 });
+    expect(comp.melodies['lead'].notes[0]).toEqual({ pitch: 0, duration: 1 });
+    expect(comp.melodies['lead'].notes[2]).toEqual({ pitch: 'rest', duration: 1 });
 
     expect(comp.tracks).toHaveLength(1);
     expect(comp.tracks[0].name).toBe('melody_track');
@@ -64,7 +64,7 @@ melodies:
       'melodies/lead.yaml': `
 instrument: unknown_inst
 notes:
-  - { pitch: 0, offset: 0, duration: 1 }
+  - { pitch: 0, duration: 1 }
 `
     };
     expect(() => parseProject(badFiles)).toThrow(/references unknown instrument 'unknown_inst'/);
@@ -82,8 +82,8 @@ melodies:
     expect(() => parseProject(badFiles)).toThrow(/references unknown melody 'unknown_melody'/);
   });
 
-  it('should parse melody notes without offsets sequentially', () => {
-    const filesWithOffsetFreeMelody = {
+  it('should parse melody notes sequentially', () => {
+    const filesWithMelody = {
       ...validFiles,
       'melodies/lead.yaml': `
 instrument: synth
@@ -93,39 +93,13 @@ notes:
   - { pitch: rest, duration: 1.0 }
 `
     };
-    const comp = parseProject(filesWithOffsetFreeMelody);
+    const comp = parseProject(filesWithMelody);
     const leadNotes = comp.melodies['lead'].notes;
     expect(leadNotes).toHaveLength(3);
     
-    // First note starts at 0.0, holds for 1.5
-    expect(leadNotes[0]).toEqual({ pitch: 0, offset: 0.0, duration: 1.5 });
-    // Second note starts at 1.5, holds for 0.5
-    expect(leadNotes[1]).toEqual({ pitch: 4, offset: 1.5, duration: 0.5 });
-    // Third note starts at 2.0, holds for 1.0
-    expect(leadNotes[2]).toEqual({ pitch: 'rest', offset: 2.0, duration: 1.0 });
-  });
-
-  it('should support mixed explicit and implicit sequential offsets', () => {
-    const filesWithMixedOffsets = {
-      ...validFiles,
-      'melodies/lead.yaml': `
-instrument: synth
-notes:
-  - { pitch: 0, duration: 1.0 }
-  - { pitch: 2, offset: 5.0, duration: 1.0 }
-  - { pitch: 4, duration: 2.0 }
-`
-    };
-    const comp = parseProject(filesWithMixedOffsets);
-    const leadNotes = comp.melodies['lead'].notes;
-    expect(leadNotes).toHaveLength(3);
-    
-    // First note starts at 0.0 (implicit)
-    expect(leadNotes[0]).toEqual({ pitch: 0, offset: 0.0, duration: 1.0 });
-    // Second note starts at 5.0 (explicit)
-    expect(leadNotes[1]).toEqual({ pitch: 2, offset: 5.0, duration: 1.0 });
-    // Third note starts at 6.0 (sequential from the second note's offset + duration)
-    expect(leadNotes[2]).toEqual({ pitch: 4, offset: 6.0, duration: 2.0 });
+    expect(leadNotes[0]).toEqual({ pitch: 0, duration: 1.5 });
+    expect(leadNotes[1]).toEqual({ pitch: 4, duration: 0.5 });
+    expect(leadNotes[2]).toEqual({ pitch: 'rest', duration: 1.0 });
   });
 
   it('should parse melody loop parameters correctly', () => {

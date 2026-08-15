@@ -19,8 +19,8 @@ describe('validator', () => {
         name: "tune",
         instrument: "sine",
         notes: [
-          { pitch: 0, offset: 0, duration: 1 },
-          { pitch: 'rest', offset: 1, duration: 0.5 }
+          { pitch: 0, duration: 1 },
+          { pitch: 'rest', duration: 0.5 }
         ]
       }
     },
@@ -114,9 +114,8 @@ describe('validator', () => {
           name: "tune",
           instrument: "sine",
           notes: [
-            { pitch: 1.5, offset: 0, duration: 1 },  // non-integer pitch
-            { pitch: 0, offset: -1, duration: 1 },   // negative offset
-            { pitch: 0, offset: 0, duration: 0 }     // zero duration
+            { pitch: 1.5, duration: 1 },  // non-integer pitch
+            { pitch: 0, duration: 0 }     // zero duration
           ]
         }
       }
@@ -125,7 +124,6 @@ describe('validator', () => {
     const result = validateComposition(invalidComp);
     expect(result.valid).toBe(false);
     expect(result.errors.some(e => e.path === 'melodies/tune.yaml' && e.message.includes('pitch'))).toBe(true);
-    expect(result.errors.some(e => e.path === 'melodies/tune.yaml' && e.message.includes('offset'))).toBe(true);
     expect(result.errors.some(e => e.path === 'melodies/tune.yaml' && e.message.includes('duration'))).toBe(true);
   });
 

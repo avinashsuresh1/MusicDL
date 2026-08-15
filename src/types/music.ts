@@ -30,12 +30,10 @@ export interface Instrument {
   adsr?: ADSR;
 }
 
-/** A single note in a melody or chord */
+/** A single note in a sequential melody */
 export interface Note {
   /** Integer interval from root frequency, or 'rest' for silence */
   pitch: number | 'rest';
-  /** Global beat time — absolute position on the composition timeline */
-  offset: number;
   /** Duration in beats */
   duration: number;
 }

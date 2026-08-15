@@ -11,33 +11,66 @@
 
 .main-container {
   display: flex;
-  flex: 1;
-  height: calc(100vh - 64px - 220px); /* Subtract toolbar and visualizer */
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: hidden;
-  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
 }
 
 mdl-explorer {
-  width: 250px;
+  width: 260px;
+  min-width: 160px;
+  max-width: 50vw;
   flex-shrink: 0;
-  border-right: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   background: var(--bg-sidebar, #100e1e);
+  overflow: hidden;
+}
+
+.resizer-horizontal {
+  width: 5px;
+  background: var(--border-color, rgba(255, 255, 255, 0.08));
+  cursor: col-resize;
+  flex-shrink: 0;
+  z-index: 10;
+  transition: background 0.15s ease;
+}
+
+.resizer-horizontal:hover,
+.resizer-horizontal.dragging {
+  background: var(--secondary, #00f2fe);
 }
 
 mdl-code-editor {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   background: #0d0b16;
   overflow: hidden;
 }
 
+.resizer-vertical {
+  height: 5px;
+  background: var(--border-color, rgba(255, 255, 255, 0.08));
+  cursor: row-resize;
+  flex-shrink: 0;
+  z-index: 10;
+  transition: background 0.15s ease;
+}
+
+.resizer-vertical:hover,
+.resizer-vertical.dragging {
+  background: var(--secondary, #00f2fe);
+}
+
 .bottom-panel {
   height: 220px;
+  min-height: 100px;
+  max-height: 50vh;
+  flex-shrink: 0;
   background: var(--bg-panel, rgba(22, 20, 38, 0.7));
   backdrop-filter: var(--panel-blur, blur(20px));
   display: flex;
   flex-direction: column;
   position: relative;
-  border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  overflow: hidden;
 }
 
 .error-bar {

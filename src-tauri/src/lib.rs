@@ -256,8 +256,24 @@ fn play_samples(
         
         let start_sample = (start_offset * sample_rate as f32) as usize;
         if start_sample < samples.len() {
-            let sliced_samples = samples[start_sample..].to_vec();
-            // Create a mono buffer source
+            let mut sliced_samples = samples[start_sample..].to_vec();
+            
+            // Apply 5ms anti-click ramp to prevent WASAPI DC offset crackling on Windows
+            let fade_samples = (sample_rate as usize / 200).max(32).min(sliced_samples.len() / 2);
+            if fade_samples > 0 {
+                // Fade in
+                for i in 0..fade_samples {
+                    let factor = i as f32 / fade_samples as f32;
+                    sliced_samples[i] *= factor;
+                }
+                // Fade out
+                let len = sliced_samples.len();
+                for i in 0..fade_samples {
+                    let factor = i as f32 / fade_samples as f32;
+                    sliced_samples[len - 1 - i] *= factor;
+                }
+            }
+
             let source = SamplesBuffer::new(1, sample_rate, sliced_samples);
             sink.append(source);
             sink.play();

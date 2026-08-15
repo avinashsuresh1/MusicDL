@@ -54,25 +54,9 @@ export function serializeMelody(melody: Melody): string {
     output += 'notes: []\n';
   } else {
     output += 'notes:\n';
-    
-    // Check if the notes are strictly sequential (i.e. start at 0 and have no gaps or overlaps)
-    let isSequential = true;
-    let expectedOffset = 0;
-    for (const note of melody.notes) {
-      if (note.offset === undefined || Math.abs(note.offset - expectedOffset) > 0.0001) {
-        isSequential = false;
-        break;
-      }
-      expectedOffset += note.duration;
-    }
-
     for (const note of melody.notes) {
       const pitchVal = note.pitch === 'rest' ? 'rest' : note.pitch;
-      if (isSequential) {
-        output += `  - { pitch: ${pitchVal}, duration: ${note.duration} }\n`;
-      } else {
-        output += `  - { pitch: ${pitchVal}, offset: ${note.offset}, duration: ${note.duration} }\n`;
-      }
+      output += `  - { pitch: ${pitchVal}, duration: ${note.duration} }\n`;
     }
   }
   return output;

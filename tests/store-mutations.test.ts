@@ -18,7 +18,7 @@ harmonics:
 type: melody
 instrument: synth
 notes:
-  - { pitch: 0, offset: 0, duration: 1 }
+  - { pitch: 0, duration: 1 }
 `,
     'tracks/melody_track.yaml': `
 volume: 0.9

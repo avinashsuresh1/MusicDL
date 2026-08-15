@@ -34,17 +34,25 @@ export function renderToSamples(
     renderNote(buffer, note, sampleRate);
   }
 
-  // Peak-normalise to 0.9 to prevent clipping
+  // Peak-normalise to 0.85 to prevent clipping
   let peak = 0;
   for (let i = 0; i < totalSamples; i++) {
     const a = Math.abs(buffer[i]);
     if (a > peak) peak = a;
   }
   if (peak > 0.001) {
-    const scale = 0.9 / peak;
+    const scale = 0.85 / peak;
     for (let i = 0; i < totalSamples; i++) {
       buffer[i] *= scale;
     }
+  }
+
+  // 5ms smooth anti-pop fade-in & fade-out on total buffer boundaries
+  const fadeSamples = Math.min(Math.floor(sampleRate * 0.005), Math.floor(totalSamples / 2));
+  for (let i = 0; i < fadeSamples; i++) {
+    const factor = i / fadeSamples;
+    buffer[i] *= factor;
+    buffer[totalSamples - 1 - i] *= factor;
   }
 
   return buffer;

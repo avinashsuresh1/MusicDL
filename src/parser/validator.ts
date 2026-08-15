@@ -84,9 +84,6 @@ export function validateMelody(
     if (note.pitch !== 'rest' && (typeof note.pitch !== 'number' || !Number.isInteger(note.pitch))) {
       errors.push({ path, message: `Melody '${name}': note[${idx}] 'pitch' must be an integer or 'rest', got ${note.pitch}` });
     }
-    if (typeof note.offset !== 'number' || isNaN(note.offset) || note.offset < 0) {
-      errors.push({ path, message: `Melody '${name}': note[${idx}] 'offset' must be a non-negative number, got ${note.offset}` });
-    }
     if (typeof note.duration !== 'number' || isNaN(note.duration) || note.duration <= 0) {
       errors.push({ path, message: `Melody '${name}': note[${idx}] 'duration' must be a positive number, got ${note.duration}` });
     }

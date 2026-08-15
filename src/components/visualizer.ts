@@ -91,9 +91,10 @@ export class Visualizer extends HTMLElement {
           const offsetShift = typeof melRef === 'string' ? 0 : (melRef.offset ?? 0);
           const mel = comp.melodies[melName];
           if (mel) {
+            let currentMelodyBeat = offsetShift;
             for (const note of mel.notes) {
-              const end = note.offset + offsetShift + note.duration;
-              if (end > max) max = end;
+              currentMelodyBeat += note.duration;
+              if (currentMelodyBeat > max) max = currentMelodyBeat;
             }
           }
         }
@@ -153,10 +154,13 @@ export class Visualizer extends HTMLElement {
           const melody = comp.melodies[melName];
           if (!melody) return;
 
+          let currentBeat = offsetShift;
           melody.notes.forEach((note: any) => {
+            const noteOffset = currentBeat;
+            currentBeat += note.duration;
             if (note.pitch === 'rest') return;
 
-            const absoluteOffset = note.offset + offsetShift;
+            const absoluteOffset = noteOffset;
             const left = absoluteOffset * this.zoomX;
             const width = note.duration * this.zoomX;
             

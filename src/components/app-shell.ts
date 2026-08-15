@@ -146,6 +146,75 @@ export class AppShell extends HTMLElement {
         handleTestFile();
       }
     });
+
+    // Resizable Panels Handlers
+    const explorerEl = this.shadowRoot!.querySelector('mdl-explorer') as HTMLElement;
+    const resizerSidebar = this.shadowRoot!.querySelector('#resizer-sidebar') as HTMLElement;
+    
+    const bottomPanelEl = this.shadowRoot!.querySelector('.bottom-panel') as HTMLElement;
+    const resizerBottom = this.shadowRoot!.querySelector('#resizer-bottom') as HTMLElement;
+
+    // Sidebar Resizer (Horizontal)
+    if (resizerSidebar && explorerEl) {
+      let isDraggingSidebar = false;
+
+      resizerSidebar.addEventListener('pointerdown', (e: PointerEvent) => {
+        isDraggingSidebar = true;
+        resizerSidebar.setPointerCapture(e.pointerId);
+        resizerSidebar.classList.add('dragging');
+        document.body.style.cursor = 'col-resize';
+      });
+
+      resizerSidebar.addEventListener('pointermove', (e: PointerEvent) => {
+        if (!isDraggingSidebar) return;
+        const rect = this.getBoundingClientRect();
+        const newWidth = Math.max(160, Math.min(e.clientX - rect.left, window.innerWidth * 0.5));
+        explorerEl.style.width = `${newWidth}px`;
+      });
+
+      const stopSidebarDrag = (e: PointerEvent) => {
+        if (isDraggingSidebar) {
+          isDraggingSidebar = false;
+          try { resizerSidebar.releasePointerCapture(e.pointerId); } catch {}
+          resizerSidebar.classList.remove('dragging');
+          document.body.style.cursor = '';
+        }
+      };
+
+      resizerSidebar.addEventListener('pointerup', stopSidebarDrag);
+      resizerSidebar.addEventListener('pointercancel', stopSidebarDrag);
+    }
+
+    // Bottom Panel Resizer (Vertical)
+    if (resizerBottom && bottomPanelEl) {
+      let isDraggingBottom = false;
+
+      resizerBottom.addEventListener('pointerdown', (e: PointerEvent) => {
+        isDraggingBottom = true;
+        resizerBottom.setPointerCapture(e.pointerId);
+        resizerBottom.classList.add('dragging');
+        document.body.style.cursor = 'row-resize';
+      });
+
+      resizerBottom.addEventListener('pointermove', (e: PointerEvent) => {
+        if (!isDraggingBottom) return;
+        const rect = this.getBoundingClientRect();
+        const newHeight = Math.max(100, Math.min(rect.bottom - e.clientY, window.innerHeight * 0.6));
+        bottomPanelEl.style.height = `${newHeight}px`;
+      });
+
+      const stopBottomDrag = (e: PointerEvent) => {
+        if (isDraggingBottom) {
+          isDraggingBottom = false;
+          try { resizerBottom.releasePointerCapture(e.pointerId); } catch {}
+          resizerBottom.classList.remove('dragging');
+          document.body.style.cursor = '';
+        }
+      };
+
+      resizerBottom.addEventListener('pointerup', stopBottomDrag);
+      resizerBottom.addEventListener('pointercancel', stopBottomDrag);
+    }
   }
 
   private updateErrorAlert() {

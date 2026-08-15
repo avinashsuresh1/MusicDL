@@ -28,9 +28,8 @@ export function getScheduledNotes(composition: Composition): ScheduledNote[] {
         if (!melody || melody.loop) {
           continue;
         }
-        for (const note of melody.notes) {
-          totalDurationBeats = Math.max(totalDurationBeats, melodyOffset + note.offset + note.duration);
-        }
+        const melodyDuration = melody.notes.reduce((sum, n) => sum + n.duration, 0);
+        totalDurationBeats = Math.max(totalDurationBeats, melodyOffset + melodyDuration);
       }
     }
     if (track.chords) {
@@ -69,26 +68,25 @@ export function getScheduledNotes(composition: Composition): ScheduledNote[] {
           continue;
         }
 
+        let currentBeatCounter = 0;
+        const notesWithOffset = melody.notes.map(n => {
+          const off = currentBeatCounter;
+          currentBeatCounter += n.duration;
+          return { ...n, offset: off };
+        });
+
         if (melody.loop) {
           // Calculate loop start and end beats relative to the melody itself
           const start = melody.loopStart !== undefined ? melody.loopStart : 0.0;
           let end = melody.loopEnd;
           if (end === undefined) {
-            // Find max note end time
-            let maxTime = 0;
-            for (const note of melody.notes) {
-              maxTime = Math.max(maxTime, note.offset + note.duration);
-            }
-            end = maxTime;
+            end = currentBeatCounter;
           }
           const loopLength = end - start;
 
           if (loopLength > 0) {
-            // Divide notes into two categories:
-            // 1. Introductory notes (before start)
-            // 2. Looping notes (within [start, end])
-            const introNotes = melody.notes.filter(n => n.offset < start);
-            const loopNotes = melody.notes.filter(n => n.offset >= start && n.offset < end);
+            const introNotes = notesWithOffset.filter(n => n.offset < start);
+            const loopNotes = notesWithOffset.filter(n => n.offset >= start && n.offset < end);
 
             // Schedule intro notes once
             for (const note of introNotes) {
@@ -112,7 +110,6 @@ export function getScheduledNotes(composition: Composition): ScheduledNote[] {
             while (currentLoopStartBeats + melodyOffset < totalDurationBeats) {
               for (const note of loopNotes) {
                 if (isRest(note.pitch)) continue;
-                // Calculate note offset relative to current loop iteration start
                 const relativeOffset = note.offset - start;
                 const absoluteOffset = melodyOffset + currentLoopStartBeats + relativeOffset;
                 const startTime = beatsToSeconds(absoluteOffset, composition.tempo);
@@ -132,7 +129,7 @@ export function getScheduledNotes(composition: Composition): ScheduledNote[] {
           }
         } else {
           // Schedule all notes normally
-          for (const note of melody.notes) {
+          for (const note of notesWithOffset) {
             if (isRest(note.pitch)) {
               continue;
             }
@@ -226,10 +223,14 @@ export function getScheduledNotesForMelody(melodyName: string, composition: Comp
   if (!instrument) return [];
 
   const scheduledNotes: ScheduledNote[] = [];
+  let currentBeat = 0;
   for (const note of melody.notes) {
+    const noteOffset = currentBeat;
+    currentBeat += note.duration;
+
     if (isRest(note.pitch)) continue;
 
-    const startTime = beatsToSeconds(note.offset, composition.tempo);
+    const startTime = beatsToSeconds(noteOffset, composition.tempo);
     const duration = beatsToSeconds(note.duration, composition.tempo);
     const totalPitch = note.pitch + (instrument.octaveShift ?? 0) * 12;
     const frequency = intervalToFrequency(totalPitch, composition.rootFrequency, composition.interval);

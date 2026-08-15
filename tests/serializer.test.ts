@@ -29,9 +29,9 @@ describe('serializer', () => {
         name: "lead",
         instrument: "flute",
         notes: [
-          { pitch: 0, offset: 0, duration: 1 },
-          { pitch: 'rest', offset: 1.5, duration: 0.5 },
-          { pitch: 12, offset: 2, duration: 2 }
+          { pitch: 0, duration: 1 },
+          { pitch: 'rest', duration: 0.5 },
+          { pitch: 12, duration: 2 }
         ]
       }
     },
