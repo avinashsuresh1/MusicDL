@@ -1,3 +1,14 @@
+> [!CAUTION]
+> **HISTORICAL ARCHIVE NOTICE**:
+> This repository (`MusicDL`) is maintained strictly for **historical purposes** and will be archived.
+> MusicDL has been split into two active repositories:
+> - **Software Engine & Desktop Application**: [`musicdl-engine`](https://github.com/avinashsuresh1/musicdl-engine)
+> - **YAML Specification & Examples**: [`musicdl-spec`](https://github.com/avinashsuresh1/musicdl-spec)
+>
+> Please visit [`musicdl-engine`](https://github.com/avinashsuresh1/musicdl-engine) for active software development and releases, and [`musicdl-spec`](https://github.com/avinashsuresh1/musicdl-spec) for the language specification.
+
+---
+
 # 🎼 MusicDL (Music Definition Language)
 
 **MusicDL** is a code-first music player and project editor. It allows you to compose music by writing simple YAML files that define instruments, melodies, chords, and tracks, and play them directly in the standalone desktop application.
